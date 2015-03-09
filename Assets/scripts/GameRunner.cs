@@ -39,7 +39,8 @@ public class GameRunner : MonoBehaviour {
 			Destroy (currentPanel.gameObject);
 		}
 		currentPanel = Panel.Create ();
-		GameObject gameGO = Resources.Load ("Game") as GameObject;
+		GameObject gameGO = (GameObject)Instantiate(Resources.Load ("Game") as GameObject, Vector3.zero, Quaternion.identity);
+		gameGO.name = "game";
 		gameGO.GetComponent<Level> ().Build (currentPanel);
 	}
 	void Update(){

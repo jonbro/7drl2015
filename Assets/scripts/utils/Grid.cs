@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 // we are using 1 unity unit to 1 grid unit, but this takes an offset such that top left is 0,0
 // going to go with at 30x20 grid 
@@ -16,6 +17,10 @@ public class Grid : MonoBehaviour {
 
 	static float offsetX = -15;
 	static float offsetY = 10;
+	public static int[,] nDir = { {0, -1}, {-1, 0}, {1, 0}, {0, 1},
+		{-1, -1}, {1, -1},
+		{-1, 1}, {1, 1} };
+
 	public static Grid instance{
 		get{ 
 			if (_instance == null) {
@@ -41,6 +46,13 @@ public class Grid : MonoBehaviour {
 
 		// for now, just force based on vertical grid size
 		cam.orthographicSize = ((float)gridSizeY+paddingY) / 2f;
+	}
+	public static List<Vector2> GetNeighborPositions(Vector2 center){
+		List<Vector2> neighbors = new List<Vector2>();
+		for (int i = 0; i < 4; i++) {
+			neighbors.Add(new Vector2(nDir[i,0]+center.x, nDir[i, 1]+center.y));
+		}
+		return neighbors;
 	}
 	public static Vector3 OffsetToVector(Offset p){
 		switch (p) {
