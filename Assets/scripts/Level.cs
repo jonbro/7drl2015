@@ -20,6 +20,7 @@ public class Level : MonoBehaviour {
 		EXIT
 	}
 	public RL.Map map;
+	public RL.CharacterMap monsterMap;
 	public List<RLCharacter> characters;
 	public List<RLCharacter> monsters;
 	FsmSystem fsm;
@@ -35,6 +36,7 @@ public class Level : MonoBehaviour {
 			.WithTransition (FsmTransitionId.Complete, FsmStateId.Player)
 		);
 		fsm.AddState (new FsmState (FsmStateId.Player)
+			.WithBeforeEnteringAction(PlayerSetup)
 			.WithUpdateAction(PlayerUpdate)
 			.WithTransition (FsmTransitionId.Complete, FsmStateId.Monster)
 			.WithTransition(FsmTransitionId.LevelComplete, FsmStateId.LevelGenWait)
@@ -44,7 +46,7 @@ public class Level : MonoBehaviour {
 			.WithTransition (FsmTransitionId.Complete, FsmStateId.Player)
 		);
 		fsm.AddState (new FsmState (FsmStateId.Monster)
-			.WithUpdateAction(MonsterUpdate)
+			.WithBeforeEnteringAction(MonsterUpdate)
 			.WithTransition (FsmTransitionId.Complete, FsmStateId.Player)
 		);
 		fsm.Start ();
@@ -55,6 +57,7 @@ public class Level : MonoBehaviour {
 			de.Destroy ();
 		}
 		map = new RL.Map (10, 10);
+		monsterMap = new RL.CharacterMap (10, 10);
 		monsters = new List<RLCharacter> ();
 		// add entrance / exit
 		map [0, Random.Range (1, 9)] = RL.Objects.ENTRANCE;
@@ -68,11 +71,15 @@ public class Level : MonoBehaviour {
 		RLCharacter player = RLCharacter.Create (pposition.x, pposition.y, "Player");
 		gamePanel.Add (player);
 		currentPlayer = player;
+
+		Vector2i monsterPosition = FindOpenPosition ();
+		RLCharacter monster = RLCharacter.Create (monsterPosition.x, monsterPosition.y, "Enemy");
+		gamePanel.Add (monster);
+		monsters.Add (monster);
+
 		// check to make sure we can walk from the beginning to the end of the level
 		Vector2i exit = GetPositionOfElement (RL.Objects.EXIT);
-		List<Vector2i> path = pf.FindPath (GetPositionOfElement (RL.Objects.ENTRANCE), exit, (int x, int y) => {
-			return 1;
-		}, map); 
+		List<Vector2i> path = pf.FindPath (GetPositionOfElement (RL.Objects.ENTRANCE), exit, OneCostFunction, map); 
 		if (HasPath (path, exit)) {
 			UpdateMapDisplay ();
 			fsm.PerformTransition (FsmTransitionId.Complete);
@@ -80,8 +87,21 @@ public class Level : MonoBehaviour {
 			GenLevel ();
 		}
 	}
+	Vector2i FindOpenPosition(){
+		Vector2i position = new Vector2i (0, 0);
+		while (map [position.x, position.y] != RL.Objects.OPEN) {
+			position = new Vector2i(Random.Range (0, map.sx), Random.Range(0, map.sy));
+		}
+		return position;
+	}
+	int OneCostFunction(int x, int y){
+		return 1;
+	}
 	bool HasPath(List<Vector2i> path, Vector2i endPoint){
 		return path.Count > 0 && path [path.Count - 1].Equals (endPoint);
+	}
+	public void PlayerSetup(){
+		currentPlayer.actionPoints = 2;
 	}
 	public void PlayerUpdate (PlayerInput externalInput = PlayerInput.NONE)
 	{
@@ -123,11 +143,35 @@ public class Level : MonoBehaviour {
 			deltaD = new Vector2i (-1, 0);
 		}
 		if (!deltaD.Equals (new Vector2i (0, 0))) {
-			if (PlayerMovement (deltaD)) {
-				fsm.PerformTransition (FsmTransitionId.Complete);
+			if (PlayerAttack(deltaD) || PlayerMovement (deltaD)) {
+				currentPlayer.actionPoints--;
+				if (currentPlayer.actionPoints == 0) {
+					fsm.PerformTransition (FsmTransitionId.Complete);
+				}
 			}
 		}
 	}
+	public bool PlayerAttack(Vector2i delta){
+		// check to see if we have enough resources to attack
+		// check to see if there is something to attack along this row
+		Vector2i currentCell = currentPlayer.position + delta;
+		while (map [currentCell.x, currentCell.y] == RL.Objects.OPEN) {
+
+			RLCharacter monster = monsterMap [currentCell.x, currentCell.y];
+			if (monster != null) {
+				monster.healthPoints--;
+				if (monster.healthPoints == 0) {
+					gamePanel.elements.Remove (monster);
+					monsters.Remove (monster);
+					monster.Destroy ();
+				}
+				return true;
+			}
+			currentCell += delta;
+		}
+		return false;
+	}
+
 	public bool PlayerMovement(Vector2i delta){
 		Vector2i newPosition = currentPlayer.position + delta;
 		switch (map [newPosition.x, newPosition.y]) {
@@ -142,9 +186,18 @@ public class Level : MonoBehaviour {
 	}
 	public void MonsterUpdate(){
 		foreach (RLCharacter m in monsters) {
-		
+			// path towards the player or attack. Should probably add overwatch support at some point for asshole monsters
+			List<Vector2i> path = pf.FindPath (m.position, currentPlayer.position, OneCostFunction, map);
+			m.position = path [1];
+			monsterMap [m.position.x, m.position.y] = m;
 		}
-		fsm.PerformTransition (FsmTransitionId.Complete);
+		StartCoroutine (WaitAndCall(.25f, () => {
+			fsm.PerformTransition (FsmTransitionId.Complete);
+		}));
+	}
+	public IEnumerator WaitAndCall(float time, System.Action toCall){
+		yield return new WaitForSeconds (time);
+		toCall ();
 	}
 	public Vector2i GetPositionOfElement(RL.Objects element){
 		for (int x = 0; x < 10; x++) {
