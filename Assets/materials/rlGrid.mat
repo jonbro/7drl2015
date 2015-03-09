@@ -7,7 +7,7 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: rlGrid
-  m_Shader: {fileID: 4800000, guid: cd9987bb33859d34cb05df1cebb9fe85, type: 3}
+  m_Shader: {fileID: 4800000, guid: 3826ac5a681dbae408bfd70dce570b7d, type: 3}
   m_ShaderKeywords: []
   m_CustomRenderQueue: -1
   m_SavedProperties:
@@ -33,4 +33,4 @@ Material:
       data:
         first:
           name: _Shape
-        second: {r: 64, g: .5, b: 27.5, a: 0}
+        second: {r: 32, g: .5, b: 12.5, a: 1.10000002}
