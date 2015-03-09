@@ -13,7 +13,8 @@ public class GameUI : MonoBehaviour
 	}
 	public void UpdateDisplay(){
 		foreach (DisplayElement de in panel.elements) {
-			de.Destroy ();
+			if(de.enabled)
+				de.Destroy ();
 		}
 		// display the current hp / ap / spells / resources for each character
 		int count = 0;
@@ -22,11 +23,18 @@ public class GameUI : MonoBehaviour
 			AddToPanelAndTransform (GridSprite.Create (12, count, c.GetSprite ()));
 			AddToPanelAndTransform (GridText.Create (13, count, "HP: "+c.healthPoints));
 			AddToPanelAndTransform (GridText.Create (15, count, "AP: "+c.actionPoints));
-			count++;
+			AddToPanelAndTransform (GridText.Create (12, count+1, "OVRWTCH: 1"));
+			count+=2;
 		}
 	}
 	public void AddToPanelAndTransform(DisplayElement de){
 		panel.Add(de);
 		de.transform.SetParent (transform);
+	}
+	void OnDestroy(){
+		foreach (DisplayElement de in panel.elements) {
+			if(de.enabled)
+				de.Destroy ();
+		}
 	}
 }

@@ -43,6 +43,10 @@ public class GameRunner : MonoBehaviour {
 		GameObject gameGO = (GameObject)Instantiate(Resources.Load ("Game") as GameObject, Vector3.zero, Quaternion.identity);
 		gameGO.name = "game";
 		gameGO.GetComponent<Level> ().Build (currentPanel);
+		gameGO.GetComponent<Level> ().OnGameOver = OnGameOver;
+	}
+	void OnGameOver(){
+		SetupTitle ();
 	}
 	void Update(){
 		if (Input.GetKeyDown (KeyCode.Space)) {
