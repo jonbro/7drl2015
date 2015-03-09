@@ -89,7 +89,7 @@ public class Level : MonoBehaviour {
 			pposition = player.position;
 		}
 		currentPlayer = players[currentPlayerCounter];
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 3; i++) {
 			Vector2i monsterPosition = FindOpenPosition ();
 			RLCharacter monster = RLCharacter.Create (monsterPosition.x, monsterPosition.y, "Enemy");
 			gamePanel.Add (monster);
@@ -281,7 +281,11 @@ public class Level : MonoBehaviour {
 			return true;
 		List<Vector2i> path = pf.FindPath (m.position, players[0].position, OneCostFunction, map);
 		for (int i = 1; i < players.Count; i++) {
-			List<Vector2i> nextPath = pf.FindPath (m.position, players[i].position, OneCostFunction, map);
+			List<Vector2i> nextPath = pf.FindPath (m.position, players[i].position, (int x, int y)=>{
+				if(monsterMap[x,y]!=null)
+					return 1000;
+				return 1;
+			}, map);
 			if(nextPath.Count < path.Count){
 				path = nextPath;
 			}
