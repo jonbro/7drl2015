@@ -40,7 +40,7 @@ public class Grid : MonoBehaviour {
 		// determine which size is larger when compared to the aspect ratio
 
 		// for now, just force based on vertical grid size
-		cam.orthographicSize = ((float)gridSizeY+paddingY) / 2;
+		cam.orthographicSize = ((float)gridSizeY+paddingY) / 2f;
 	}
 	public static Vector3 OffsetToVector(Offset p){
 		switch (p) {

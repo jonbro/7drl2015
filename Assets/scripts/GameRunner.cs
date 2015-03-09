@@ -3,10 +3,14 @@ using System.Collections;
 
 public class GameRunner : MonoBehaviour {
 	Panel currentPanel;
+	public bool jumpToGame = true;
 	// Use this for initialization
 	void Start () {
 		SetupGrid ();
-		SetupTitle ();
+		if (jumpToGame)
+			SetupGame ();
+		else
+			SetupTitle ();
 	}
 	void SetupGrid(){
 		int gridX = 20;
@@ -27,12 +31,16 @@ public class GameRunner : MonoBehaviour {
 		currentPanel.Add(GridText.Create (0, 3, "Run Op"));
 	}
 	void SetupGame(){
-		// destroy everything on the current panel and get the game displaying
-		foreach (DisplayElement de in currentPanel.elements) {
-			de.Destroy ();
+		if (currentPanel != null) {
+			// destroy everything on the current panel and get the game displaying
+			foreach (DisplayElement de in currentPanel.elements) {
+				de.Destroy ();
+			}
+			Destroy (currentPanel.gameObject);
 		}
-		Destroy(currentPanel.gameObject);
 		currentPanel = Panel.Create ();
+		GameObject gameGO = Resources.Load ("Game") as GameObject;
+		gameGO.GetComponent<Level> ().Build (currentPanel);
 	}
 	void Update(){
 		if (Input.GetKeyDown (KeyCode.Space)) {
