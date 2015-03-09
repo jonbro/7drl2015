@@ -56,5 +56,8 @@ public class RLCharacter : DisplayElement
 		character.healthPoints = 3;
 		return character;
 	}
+	public Sprite GetSprite(){
+		return GetComponent<SpriteRenderer> ().sprite;
+	}
 }
 

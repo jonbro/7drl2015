@@ -21,15 +21,18 @@ public class Level : MonoBehaviour {
 	}
 	public RL.Map map;
 	public RL.CharacterMap monsterMap;
-	public List<RLCharacter> characters;
+	public List<RLCharacter> players;
 	public List<RLCharacter> monsters;
 	FsmSystem fsm;
+	GameUI ui;
 	RL.Pathfinder pf = new RL.Pathfinder ();
 
 	Panel gamePanel;
 	RLCharacter currentPlayer;
 	public void Build(Panel _gamePanel){
 		gamePanel = _gamePanel;
+		ui = ((GameObject)Instantiate((Resources.Load ("UI") as GameObject))).GetComponent<GameUI>();
+		ui.Setup (this);
 		fsm = new FsmSystem ();
 		fsm.AddState (new FsmState (FsmStateId.InitialGen)
 			.WithBeforeEnteringAction(GenLevel)
@@ -59,6 +62,7 @@ public class Level : MonoBehaviour {
 		map = new RL.Map (10, 10);
 		monsterMap = new RL.CharacterMap (10, 10);
 		monsters = new List<RLCharacter> ();
+		players = new List<RLCharacter> ();
 		// add entrance / exit
 		map [0, Random.Range (1, 9)] = RL.Objects.ENTRANCE;
 		map [9, Random.Range (1, 9)] = RL.Objects.EXIT;
@@ -68,9 +72,12 @@ public class Level : MonoBehaviour {
 		}
 		//		// add in a player character
 		Vector2i pposition = GetPositionOfElement (RL.Objects.ENTRANCE) + new Vector2i (1, 0);
+
 		RLCharacter player = RLCharacter.Create (pposition.x, pposition.y, "Player");
+		player.gameObject.name = "player";
 		gamePanel.Add (player);
 		currentPlayer = player;
+		players.Add (player);
 
 		Vector2i monsterPosition = FindOpenPosition ();
 		RLCharacter monster = RLCharacter.Create (monsterPosition.x, monsterPosition.y, "Enemy");
@@ -144,12 +151,17 @@ public class Level : MonoBehaviour {
 		}
 		if (!deltaD.Equals (new Vector2i (0, 0))) {
 			if (PlayerAttack(deltaD) || PlayerMovement (deltaD)) {
+				ui.UpdateDisplay ();
 				currentPlayer.actionPoints--;
 				if (currentPlayer.actionPoints == 0) {
 					fsm.PerformTransition (FsmTransitionId.Complete);
 				}
 			}
 		}
+	}
+	public bool MonsterAttack(){
+		// check to see if one of the neighboring cells has a character in it, and attack if so
+		return false;
 	}
 	public bool PlayerAttack(Vector2i delta){
 		// check to see if we have enough resources to attack

@@ -15,11 +15,12 @@ public class GameRunner : MonoBehaviour {
 	void SetupGrid(){
 		int gridX = 20;
 		int gridY = 15;
+		GameObject gridHolder = new GameObject ("grid");
 		Grid.SetCameraSize (gridX, gridY, 2, 2);
 		// setup the grid with sprites for now (to be replaced by cale's screenspace thing at some point)
 		for (int x = 0; x < gridX; x++) {
 			for (int y = 0; y < gridY; y++) {
-				GridSprite.Create (x, y, SpriteLibrary.FindSprite ("gridPoint"), Grid.Offset.UPPER_LEFT);
+				GridSprite.Create (x, y, SpriteLibrary.FindSprite ("gridPoint"), Grid.Offset.UPPER_LEFT).gameObject.transform.SetParent(gridHolder.transform, true);
 			}
 		}
 	}
