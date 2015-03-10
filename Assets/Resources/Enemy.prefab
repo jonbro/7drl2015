@@ -9,7 +9,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 441842}
   - 114: {fileID: 11441842}
-  - 212: {fileID: 21241842}
+  - 114: {fileID: 11452790}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -41,28 +41,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   OnPanels: []
---- !u!212 &21241842
-SpriteRenderer:
+--- !u!114 &11452790
+MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 141842}
   m_Enabled: 1
-  m_CastShadows: 0
-  m_ReceiveShadows: 0
-  m_LightmapIndex: 255
-  m_LightmapTilingOffset: {x: 1, y: 1, z: 0, w: 0}
-  m_Materials:
-  - {fileID: 10754, guid: 0000000000000000e000000000000000, type: 0}
-  m_SubsetIndices: 
-  m_StaticBatchRoot: {fileID: 0}
-  m_UseLightProbes: 0
-  m_LightProbeAnchor: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 8bf0e4db82c39464c81ea8335bffb00e, type: 3}
-  m_Color: {r: 1, g: .349019587, b: .468698502, a: 1}
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed1a219a81d9149e6a5086d7efcaf11e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 2100000, guid: 165e66066f15b4c81a9b312d7cc412ea, type: 2}
+  SVGFile: {fileID: 4900000, guid: adfee02b088fb4bbf985a71886e826aa, type: 3}
+  LineThickness: .0799999982
+  color: {r: .964705884, g: .245905414, b: .378052622, a: 1}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

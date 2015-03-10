@@ -424,13 +424,13 @@ public class Level : MonoBehaviour {
 			for (int y = 0; y < 10; y++) {
 				switch (map [x, y]) {
 				case RL.Objects.WALL:
-					gamePanel.Add(GridSprite.Create (x, y, SpriteLibrary.FindSprite ("circ5_1")));
+					gamePanel.Add(GridSVG.Create (x, y, "wall"));
 					break;
 				case RL.Objects.ENTRANCE:
-					gamePanel.Add(GridSprite.Create (x, y, SpriteLibrary.FindSprite ("dot2_0")));
+					gamePanel.Add(GridSVG.Create (x, y, "airlock"));
 					break;
 				case RL.Objects.EXIT:
-					gamePanel.Add(GridSprite.Create (x, y, SpriteLibrary.FindSprite ("dot0_0")));
+					gamePanel.Add(GridSVG.Create (x, y, "airlock"));
 					break;
 				}
 			}

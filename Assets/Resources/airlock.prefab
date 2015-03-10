@@ -8,10 +8,10 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 457002}
-  - 114: {fileID: 11457002}
   - 114: {fileID: 11422462}
+  - 114: {fileID: 11436786}
   m_Layer: 0
-  m_Name: Player
+  m_Name: airlock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -41,10 +41,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: 165e66066f15b4c81a9b312d7cc412ea, type: 2}
-  SVGFile: {fileID: 4900000, guid: f54be5e178e224e3aa1350562fcce165, type: 3}
+  SVGFile: {fileID: 4900000, guid: 7ba2632d0145548cbbe30b9a4b1e45a6, type: 3}
   LineThickness: .0799999982
-  color: {r: .781980991, g: .945098042, b: .203844666, a: 1}
---- !u!114 &11457002
+  color: {r: .4005844, g: .551843286, b: .580392182, a: 1}
+--- !u!114 &11436786
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -52,7 +52,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 157002}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c99477a81cfbb473398d9acbdd9051b7, type: 3}
+  m_Script: {fileID: 11500000, guid: e624c5d891a6f4c82ac41f2d58827af6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   OnPanels: []

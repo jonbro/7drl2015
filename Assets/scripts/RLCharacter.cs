@@ -19,13 +19,13 @@ public class RLCharacter : DisplayElement
 		set {
 			// attach the action point display if required,
 			_actionPoints = value;
-			if (actionPointDisplay == null) {
-				GameObject actionPointDisplayGO = new GameObject ("actionPoints");
-				actionPointDisplay = actionPointDisplayGO.AddComponent<SpriteRenderer> ();
-				actionPointDisplayGO.transform.SetParent (transform, false);
-				actionPointDisplayGO.transform.localPosition = Vector3.zero;
-			}
-			actionPointDisplay.sprite = SpriteLibrary.FindSprite ("AP_" + _actionPoints);
+//			if (actionPointDisplay == null) {
+//				GameObject actionPointDisplayGO = new GameObject ("actionPoints");
+//				actionPointDisplay = actionPointDisplayGO.AddComponent<SpriteRenderer> ();
+//				actionPointDisplayGO.transform.SetParent (transform, false);
+//				actionPointDisplayGO.transform.localPosition = Vector3.zero;
+//			}
+//			actionPointDisplay.sprite = SpriteLibrary.FindSprite ("AP_" + _actionPoints);
 		}
 	}
 	bool _current = false;
@@ -33,7 +33,7 @@ public class RLCharacter : DisplayElement
 		get{ return _current; }
 		set{ 
 			_current = value;
-			if (!_current) {
+			if (!_current && spriteR) {
 				spriteR.color = originalColor;
 			}
 		}
@@ -64,13 +64,13 @@ public class RLCharacter : DisplayElement
 		set {
 			// attach the action point display if required,
 			_healthPoints = value;
-			if (healthPointDisplay == null) {
-				GameObject healthPointDisplayGO = new GameObject ("healthPoints");
-				healthPointDisplay = healthPointDisplayGO.AddComponent<SpriteRenderer> ();
-				healthPointDisplayGO.transform.SetParent (transform, false);
-				healthPointDisplayGO.transform.localPosition = Vector3.zero;
-			}
-			healthPointDisplay.sprite = SpriteLibrary.FindSprite ("HP_" + _healthPoints);
+//			if (healthPointDisplay == null) {
+//				GameObject healthPointDisplayGO = new GameObject ("healthPoints");
+//				healthPointDisplay = healthPointDisplayGO.AddComponent<SpriteRenderer> ();
+//				healthPointDisplayGO.transform.SetParent (transform, false);
+//				healthPointDisplayGO.transform.localPosition = Vector3.zero;
+//			}
+//			healthPointDisplay.sprite = SpriteLibrary.FindSprite ("HP_" + _healthPoints);
 		}
 	}
 
@@ -92,14 +92,17 @@ public class RLCharacter : DisplayElement
 		character.actionPoints = 2;
 		character.healthPoints = 3;
 		character.spriteR = character.GetComponent<SpriteRenderer> ();
-		character.originalColor = character.spriteR.color;
+		if(character.spriteR)
+			character.originalColor = character.spriteR.color;
 		return character;
 	}
 	public Sprite GetSprite(){
+		if (!spriteR)
+			return null;
 		return spriteR.sprite;
 	}
 	void Update(){
-		if (current) {
+		if (current && spriteR) {
 			spriteR.color = Color.Lerp (Color.clear, originalColor, ((Mathf.Sin (Time.time*5f) + 1)*0.5f) * 0.5f + 0.5f);
 		}
 	}

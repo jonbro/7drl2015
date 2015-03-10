@@ -13,7 +13,9 @@ public class DisplayElement : MonoBehaviour {
 		HideImmediate ();
 	}
 	public void Show(){
-		GetComponent<SpriteRenderer> ().enabled = true;
+		if (GetComponent<SpriteRenderer> ()) {
+			GetComponent<SpriteRenderer> ().enabled = true;
+		}
 		foreach (SpriteRenderer sr in GetComponentsInChildren<SpriteRenderer>()) {
 			sr.enabled = true;
 		}
