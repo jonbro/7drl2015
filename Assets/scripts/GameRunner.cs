@@ -4,6 +4,7 @@ using System.Collections;
 public class GameRunner : MonoBehaviour {
 	Panel currentPanel;
 	public bool jumpToGame = true;
+	public GameObject grid;
 	// Use this for initialization
 	void Start () {
 		SetupGrid ();
@@ -17,12 +18,9 @@ public class GameRunner : MonoBehaviour {
 		int gridY = 15;
 		GameObject gridHolder = new GameObject ("grid");
 		Grid.SetCameraSize (gridX, gridY, 2, 2);
-		// setup the grid with sprites for now (to be replaced by cale's screenspace thing at some point)
-		for (int x = 0; x < gridX; x++) {
-			for (int y = 0; y < gridY; y++) {
-				GridSprite.Create (x, y, SpriteLibrary.FindSprite ("gridPoint"), Grid.Offset.UPPER_LEFT).gameObject.transform.SetParent(gridHolder.transform, true);
-			}
-		}
+		//TODO make this the correct size
+		grid.transform.localScale = new Vector3(gridX,gridY,1);
+	
 	}
 	void SetupTitle(){
 		currentPanel = Panel.Create ();
