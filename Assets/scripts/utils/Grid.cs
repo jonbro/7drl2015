@@ -31,7 +31,7 @@ public class Grid : MonoBehaviour {
 		}
 	}
 	public static Vector3 GridToWorld(Vector2 v){
-		return new Vector3 (v.x + Grid.offsetX, -v.y + Grid.offsetY);
+		return new Vector3 (v.x, -v.y);
 	}
 	public static Vector3 GridToWorld(int x, int y){
 		return GridToWorld (new Vector2 (x, y));

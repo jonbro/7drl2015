@@ -3,6 +3,7 @@
 		_Color("Color",Color) = (1.0,1.0,1.0,1.0)
 		_Background("Background",Color) = (0.0,0.0,0.0,0.0)
 		_Shape("Shape",Vector) = (0.0,0.0,0.0,0.0)
+		_Offset("Offset", Vector) = (0.0,0.0,0.0,0.0)
 	}
 	SubShader {
 		Blend SrcAlpha OneMinusSrcAlpha
@@ -20,6 +21,7 @@
 			#include "UnityCG.cginc"
 			
 			uniform float4 _Shape;
+			uniform float2 _Offset;
 			uniform float4 _Color;
 			uniform float4 _Background;
 			
@@ -41,7 +43,7 @@
 			fixed4 frag (v2f i) : COLOR{
 				float4 p = i.screen;//mul (UNITY_MATRIX_MVP, i.screen);
 				p.xy /= p.w;
-				p.xy = 0.5*(p.xy+1.0) * _ScreenParams.xy;
+				p.xy = 0.5*(p.xy+1.0) * _ScreenParams.xy + _Offset.xy;
 				float2 uv = p.xy;
 				float f = step(abs(mod(uv.x,_Shape.x)-_Shape.x*.5),_Shape.y);
 				f = max(f,step(abs(mod(uv.y,_Shape.x)-_Shape.x*.5),_Shape.y));	

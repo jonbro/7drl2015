@@ -183,7 +183,11 @@ public class Level : MonoBehaviour {
 		}
 		currentPlayer.current = true;
 	}
-	public void PlayerUpdate (PlayerInput externalInput = PlayerInput.NONE)
+	public void PlayerUpdate ()
+	{
+		PlayerUpdate (PlayerInput.NONE);
+	}
+	public void PlayerUpdate (PlayerInput externalInput)
 	{
 		bool performedAction = false;
 		bool performedMove = false;
@@ -230,7 +234,7 @@ public class Level : MonoBehaviour {
 		}
 		if (!deltaD.Equals (new Vector2i (0, 0))) {
 			UpdateMonsterMap ();
-			if (Attack(deltaD, currentPlayer, monsterMap) || PlayerMovement (deltaD)) {
+			if (Attack(deltaD, currentPlayer, monsterMap, playerMap) || PlayerMovement (deltaD)) {
 				CompletePlayerActions ();
 			}
 		}
@@ -239,7 +243,7 @@ public class Level : MonoBehaviour {
 		ui.UpdateDisplay ();
 		UpdatePlayerMap ();
 		currentPlayer.actionPoints--;
-		if (currentPlayer.actionPoints == 0) {
+		if (currentPlayer.actionPoints <= 0) {
 			currentPlayerCounter = currentPlayerCounter + 1;
 			if (currentPlayerCounter > players.Count - 1) {
 				fsm.PerformTransition (FsmTransitionId.Complete);
@@ -254,11 +258,11 @@ public class Level : MonoBehaviour {
 			playerMap [p.position.x, p.position.y] = p;
 		}
 	}
-	public bool Attack(Vector2i delta, RLCharacter firingCharacter, RL.CharacterMap cMap){
+	public bool Attack(Vector2i delta, RLCharacter firingCharacter, RL.CharacterMap cMap, RL.CharacterMap blockerMap){
 		// check to see if one of the neighboring cells has a character in it, and attack if so
 		Vector2i currentCell = firingCharacter.position + delta;
 
-		while (map [currentCell.x, currentCell.y] == RL.Objects.OPEN) {
+		while (map [currentCell.x, currentCell.y] == RL.Objects.OPEN && blockerMap[currentCell.x, currentCell.y] == null) {
 
 			RLCharacter enemy = cMap [currentCell.x, currentCell.y];
 			if (enemy != null) {
@@ -306,6 +310,8 @@ public class Level : MonoBehaviour {
 			currentPlayer.Hide ();
 			if (players.Count == 0) {
 				fsm.PerformTransition (FsmTransitionId.LevelComplete);
+			} else {
+				CompletePlayerActions ();
 			}
 			return false;
 		}
@@ -321,7 +327,7 @@ public class Level : MonoBehaviour {
 		bool attacked = false;
 		for (int i = 0; i < 4; i++) {
 			Vector2i AttackDirection = new Vector2i (RL.Map.nDir [i, 0], RL.Map.nDir [i, 1]);
-			if (Attack (AttackDirection, m, playerMap)) {
+			if (Attack (AttackDirection, m, playerMap, monsterMap)) {
 				// if the attack happens on the first turn, should remove action points
 				return true;
 			}
@@ -342,8 +348,9 @@ public class Level : MonoBehaviour {
 				path = nextPath;
 			}
 		}
-		m.position = path [1];
-		// check to see if we just stepped into a players overwatch
+		if (monsterMap [path [1].x, path [1].y] == null && playerMap [path [1].x, path [1].y] == null) {
+			m.position = path [1];
+		}
 		return true;
 	}
 	public void CheckOverwatch(){
@@ -352,7 +359,7 @@ public class Level : MonoBehaviour {
 			if (p.overwatch) {
 				for (int i = 0; i < 4; i++) {
 					Vector2i AttackDirection = new Vector2i (RL.Map.nDir [i, 0], RL.Map.nDir [i, 1]);
-					if (Attack (AttackDirection, p, monsterMap)) {
+					if (Attack (AttackDirection, p, monsterMap, playerMap)) {
 						// if the attack happens on the first turn, should remove action points
 						p.overwatch = false;
 						break;
@@ -430,6 +437,7 @@ public class Level : MonoBehaviour {
 		}
 	}
 	void Update(){
-		fsm.CurrentState.Update ();
+		if(fsm != null)
+			fsm.CurrentState.Update ();
 	}
 }

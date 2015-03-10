@@ -15,7 +15,7 @@ public class GameRunner : MonoBehaviour {
 	}
 	void SetupGrid(){
 		int gridX = 20;
-		int gridY = 15;
+		int gridY = 12;
 		GameObject gridHolder = new GameObject ("grid");
 		Grid.SetCameraSize (gridX, gridY, 2, 2);
 		//TODO make this the correct size
