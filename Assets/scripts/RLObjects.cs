@@ -13,14 +13,13 @@ namespace RL
 	public enum Objects : long
 	{
 		EMPTY 							= 0,
-
+		OPEN 							= 1 << 0,
 		WALL							= 1 << 1,
 		HARD_WALL						= 1 << 1,
 		ENTRANCE						= 1 << 3,
 		EXIT							= 1 << 4,
 
 		CANTWALK						= (WALL | HARD_WALL),
-		OPEN 							= ~(CANTWALK | ENTRANCE | EXIT),
 
 	}
 	public static class ObjectExtensions{

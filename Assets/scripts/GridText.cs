@@ -15,7 +15,8 @@ public class GridText : DisplayElement {
 		text = GetComponent<TextMesh> ();
 	}
 	override public void Destroy(){
-		StartCoroutine (DestroySlow());
+		if(enabled)
+			StartCoroutine (DestroySlow());
 	}
 	IEnumerator DestroySlow(){
 		// hide slow, then destroy the object

@@ -67,6 +67,10 @@ namespace RL{
 		{
 			get 
 			{ 
+				if (
+					indexX + offsetX < 0 || indexX + offsetX >= map.GetLength (0)
+					|| indexY + offsetY < 0 || indexY + offsetY >= map.GetLength (1))
+					return null;
 				return map[indexX+offsetX, indexY+offsetY]; 
 			}
 			set 
