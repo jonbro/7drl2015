@@ -26,6 +26,7 @@ uniform sampler2D _Flow;
 uniform sampler2D _Stop;
 uniform float4 _x;
 uniform float4 _scroll;
+uniform float4 _center;
 
 fixed4 frag (v2f_img i) : COLOR
 {
@@ -34,8 +35,9 @@ fixed4 frag (v2f_img i) : COLOR
 	uv.y = 1.0-uv.y;
 	float4 f = tex2D(_Flow,uv+_scroll.xy);
 	float4 stop = tex2D(_Stop,uv);
-	uv.x+=sin(f.r*6.28+_x.z)*_x.x*stop.x;
-	uv.y += cos(f.g*6.28+_x.z)*_x.y*stop.y;
+	float angle = atan2(uv.y-_center.y,uv.x-_center.x);
+	uv.x -= cos(angle)*f.r*_x.x*stop.x;
+	uv.y -= sin(angle)*f.r*_x.y*stop.y;
 	float4 s = tex2D(_Last,uv);
 	return max(c,lerp(c,s,_x.w));
 }

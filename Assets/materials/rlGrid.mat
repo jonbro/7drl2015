@@ -33,4 +33,4 @@ Material:
       data:
         first:
           name: _Shape
-        second: {r: 32, g: .5, b: 12.5, a: 1.10000002}
+        second: {r: 32, g: .5, b: 10.5, a: 0}

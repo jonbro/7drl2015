@@ -13,6 +13,7 @@ public class Compression : ImageEffectBase {
 	public float phasePerSecond = 0;
 	public Vector2 scrollPerSecond = Vector2.zero;
 	Vector2 scroll = Vector2.zero;
+	public Transform center;
 
 	
 	// Called by camera to apply image effect
@@ -28,7 +29,11 @@ public class Compression : ImageEffectBase {
 		}
 		accumTexture.MarkRestoreExpected();
 		phase+=phasePerSecond*Time.deltaTime;
-		
+
+		Vector3 p = new Vector3(center.position.x,center.position.y,center.position.z);
+		p = camera.WorldToViewportPoint(p);
+		material.SetVector("_center",new Vector4(p.x,p.y,p.z,0.0f));
+
 		material.SetVector("_x", new Vector4(offset.x,offset.y,phase,fade));
 		material.SetVector("_scroll", new Vector4(scroll.x,scroll.y,0,0));
 		material.SetTexture("_Last", accumTexture);
