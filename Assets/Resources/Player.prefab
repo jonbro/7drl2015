@@ -37,13 +37,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 157002}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed1a219a81d9149e6a5086d7efcaf11e, type: 3}
+  m_Script: {fileID: 11500000, guid: 5eed998aae2364fedb7080478bfa3b12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: 165e66066f15b4c81a9b312d7cc412ea, type: 2}
+  pixelThickness: 2
+  color: {r: .739385009, g: 1, b: .380392134, a: 1}
   SVGFile: {fileID: 4900000, guid: f54be5e178e224e3aa1350562fcce165, type: 3}
-  LineThickness: .0799999982
-  color: {r: .781980991, g: .945098042, b: .203844666, a: 1}
 --- !u!114 &11457002
 MonoBehaviour:
   m_ObjectHideFlags: 1
