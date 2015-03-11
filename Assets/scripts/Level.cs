@@ -29,7 +29,7 @@ public class Level : MonoBehaviour {
 	RL.Pathfinder pf = new RL.Pathfinder ();
 	public System.Action OnGameOver;
 	Panel gamePanel;
-	RLCharacter currentPlayer;
+	public RLCharacter currentPlayer;
 	public void Build(Panel _gamePanel){
 		gamePanel = _gamePanel;
 		ui = ((GameObject)Instantiate((Resources.Load ("UI") as GameObject))).GetComponent<GameUI>();

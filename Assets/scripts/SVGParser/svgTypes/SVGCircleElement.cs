@@ -35,7 +35,7 @@ public class SVGCircleElement : SVGTransformable, SVGParser.IElementToVector {
   }
 	public List<Vector2> GetPoints(){
 		List<Vector2> points = new List<Vector2> ();
-		int circleDensity = 30;
+		int circleDensity = 20;
 		for(int i=0;i<circleDensity+1;i++){
 			float normalX = Mathf.Cos(i/(float)circleDensity*Mathf.PI*2);
 			float normalY = Mathf.Sin(i/(float)circleDensity*Mathf.PI*2);

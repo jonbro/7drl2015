@@ -13,8 +13,11 @@ public class GameUI : MonoBehaviour
 	}
 	public void Update(){
 		foreach (RLCharacter c in level.players) {
-			VectorGui.Label("HP: "+c.healthPoints, 0.25f);
-			VectorGui.Label("AP: "+c.actionPoints, 0.25f);
+			Color color = Color.white;
+			if (c == level.currentPlayer)
+				color = Color.green;
+			VectorGui.Label("HP: "+c.healthPoints, 0.25f, color);
+			VectorGui.Label("AP: "+c.actionPoints, 0.25f, color);
 		}
 	}
 	public void AddToPanelAndTransform(DisplayElement de){
