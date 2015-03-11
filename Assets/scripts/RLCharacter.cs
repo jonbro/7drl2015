@@ -5,7 +5,8 @@ using System;
 
 public class RLCharacter : DisplayElement
 {
-	SpriteRenderer actionPointDisplay, healthPointDisplay, overwatchDisplay;
+	SpriteRenderer actionPointDisplay, overwatchDisplay;
+	SvgRenderer healthPointDisplay;
 	public int x {
 		get{ return position.x; }
 	}
@@ -33,8 +34,8 @@ public class RLCharacter : DisplayElement
 		get{ return _current; }
 		set{ 
 			_current = value;
-			if (!_current && spriteR) {
-				spriteR.color = originalColor;
+			if (!_current) {
+				GetComponent<SvgRenderer>().colorProperty = originalColor;
 			}
 		}
 	}
@@ -64,13 +65,14 @@ public class RLCharacter : DisplayElement
 		set {
 			// attach the action point display if required,
 			_healthPoints = value;
-//			if (healthPointDisplay == null) {
-//				GameObject healthPointDisplayGO = new GameObject ("healthPoints");
-//				healthPointDisplay = healthPointDisplayGO.AddComponent<SpriteRenderer> ();
-//				healthPointDisplayGO.transform.SetParent (transform, false);
-//				healthPointDisplayGO.transform.localPosition = Vector3.zero;
-//			}
-//			healthPointDisplay.sprite = SpriteLibrary.FindSprite ("HP_" + _healthPoints);
+			if (healthPointDisplay == null) {
+				healthPointDisplay = GridSVG.CreateFromSvg (x, y, "HP_3").GetComponent<SvgRenderer>();
+				GameObject healthPointDisplayGO = healthPointDisplay.gameObject;
+				healthPointDisplayGO.transform.SetParent (transform, false);
+				healthPointDisplayGO.transform.localPosition = Vector3.zero;
+			}
+			healthPointDisplay.LoadSvgFromResources("HP_" + _healthPoints);
+			healthPointDisplay.colorProperty = originalColor;
 		}
 	}
 
@@ -88,12 +90,11 @@ public class RLCharacter : DisplayElement
 	public static RLCharacter Create(int x, int y, string ResourceName){
 		GameObject characterGO = (GameObject)Instantiate (Resources.Load (ResourceName) as GameObject, Grid.GridToWorld (x, y), Quaternion.identity);
 		RLCharacter character = characterGO.GetComponent<RLCharacter> ();
+		character.originalColor = character.GetComponent<SvgRenderer>().colorProperty;
 		character.position = new Vector2i (x, y);
 		character.actionPoints = 2;
 		character.healthPoints = 3;
 		character.spriteR = character.GetComponent<SpriteRenderer> ();
-		if(character.spriteR)
-			character.originalColor = character.spriteR.color;
 		return character;
 	}
 	public Sprite GetSprite(){
@@ -102,8 +103,8 @@ public class RLCharacter : DisplayElement
 		return spriteR.sprite;
 	}
 	void Update(){
-		if (current && spriteR) {
-			spriteR.color = Color.Lerp (Color.clear, originalColor, ((Mathf.Sin (Time.time*5f) + 1)*0.5f) * 0.5f + 0.5f);
+		if (current) {
+			GetComponent<SvgRenderer>().colorProperty = Color.Lerp (Color.clear, originalColor, ((Mathf.Sin (Time.time*5f) + 1)*0.5f) * 0.5f + 0.5f);
 		}
 	}
 }

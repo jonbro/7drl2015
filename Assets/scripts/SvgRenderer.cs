@@ -7,13 +7,23 @@ public class SvgRenderer : MonoBehaviour {
 	int[] indices;
 	Color32[] cs;
 	int currentLine = 0;
-	int maxLines = 300;
+	int maxLines = 1000;
 	private Mesh mesh;
 	public Material material;
 	public TextAsset SVGFile = null;
 	float scale = 100;
 	public float LineThickness = 0.01f;
 	public Color color;
+	bool svgLoaded = false;
+	public Color colorProperty {
+		get{
+			return color;
+		}
+		set{
+			color = value;
+			UpdateColor ();
+		}
+	}
 	void Awake () {
 		if (GetComponent<MeshFilter> () == null) {
 			gameObject.AddComponent<MeshFilter> ();
@@ -31,10 +41,6 @@ public class SvgRenderer : MonoBehaviour {
 		verts = new Vector3[maxLines*2];
 		uv = new Vector2[maxLines*2];
 		cs = new Color32[maxLines*2];
-		// blank everything so it doesn't go out of bounds
-		for(int i=0;i<maxLines*2;i++){
-			verts[i] = Vector3.zero;
-		}
 		indices = new int[maxLines*2];
 		// SetupMesh();
 		mesh.vertices = verts;
@@ -44,9 +50,19 @@ public class SvgRenderer : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		// get single pixel width
+		if(!svgLoaded)
+			LoadSvgFromTextAsset (SVGFile);
+	}
+	public void LoadSvgFromResources(string svgName){
+		TextAsset asset = Resources.Load ("svgs/Generated Assets/" + svgName) as TextAsset;
+		if (asset != null) {
+			LoadSvgFromTextAsset (asset);
+		}
+	}
+	public void LoadSvgFromTextAsset(TextAsset asset){
 		float pixelSize = Mathf.Abs(Camera.main.ScreenToWorldPoint (Vector3.zero).x - Camera.main.ScreenToWorldPoint (Vector3.one).x);;
 		LineThickness = pixelSize*2;
-		SVGParser parsedSVG = new SVGParser (SVGFile.text);
+		SVGParser parsedSVG = new SVGParser (asset.text);
 		List<object> elementsStack = new List<object> ();
 		parsedSVG.GetElementList (elementsStack, new SVGTransformList());
 		Vector2 flipVertical = new Vector2 (1, -1);
@@ -72,10 +88,25 @@ public class SvgRenderer : MonoBehaviour {
 			uv [i] = vbo [i].uv0;
 			indices [i] = i;
 		}
-		mesh.vertices = verts;
-		mesh.colors32 = cs;
-		mesh.uv = uv;
-		mesh.SetIndices(indices, MeshTopology.Quads, 0);
+		SubmitMesh ();
+		svgLoaded = true;
+	}
+	void UpdateColor(){
+		if (cs != null) {
+			for (int i = 0; i < cs.Length; i++) {
+				cs [i] = color;
+			}
+			SubmitMesh ();
+		}
+	}
+	void SubmitMesh(){
+		if (mesh != null) {
+			mesh.Clear ();
+			mesh.vertices = verts;
+			mesh.colors32 = cs;
+			mesh.uv = uv;
+			mesh.SetIndices (indices, MeshTopology.Quads, 0);
+		}
 	}
 	void OnFillVBO(List<UIVertex> vbo, List<Vector2> Points = null, float capSize = 0.1f)
 	{

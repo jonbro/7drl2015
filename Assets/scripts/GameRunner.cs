@@ -6,8 +6,10 @@ public class GameRunner : MonoBehaviour {
 	public bool jumpToGame = true;
 	public GameObject grid;
 	// Use this for initialization
-	void Start () {
+	void Awake () {
 		SetupGrid ();
+	}
+	void Start(){
 		if (jumpToGame)
 			SetupGame ();
 		else

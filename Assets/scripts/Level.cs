@@ -240,7 +240,6 @@ public class Level : MonoBehaviour {
 		}
 	}
 	void CompletePlayerActions(){
-		ui.UpdateDisplay ();
 		UpdatePlayerMap ();
 		currentPlayer.actionPoints--;
 		if (currentPlayer.actionPoints <= 0) {
@@ -262,7 +261,7 @@ public class Level : MonoBehaviour {
 		// check to see if one of the neighboring cells has a character in it, and attack if so
 		Vector2i currentCell = firingCharacter.position + delta;
 
-		while (map [currentCell.x, currentCell.y] == RL.Objects.OPEN && blockerMap[currentCell.x, currentCell.y] == null) {
+		while (map.IsValidTile(currentCell.x, currentCell.y) && map [currentCell.x, currentCell.y] == RL.Objects.OPEN && blockerMap[currentCell.x, currentCell.y] == null) {
 
 			RLCharacter enemy = cMap [currentCell.x, currentCell.y];
 			if (enemy != null) {

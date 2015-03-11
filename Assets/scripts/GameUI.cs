@@ -11,20 +11,10 @@ public class GameUI : MonoBehaviour
 		panel = Panel.Create();
 		level = _level;
 	}
-	public void UpdateDisplay(){
-		foreach (DisplayElement de in panel.elements) {
-			if(de.enabled)
-				de.Destroy ();
-		}
-		// display the current hp / ap / spells / resources for each character
-		int count = 0;
+	public void Update(){
 		foreach (RLCharacter c in level.players) {
-			// show the sprite for the character so that we can match it
-//			AddToPanelAndTransform (GridSprite.Create (12, count, c.GetSprite ()));
-			AddToPanelAndTransform (GridText.Create (13, count, "HP: "+c.healthPoints));
-			AddToPanelAndTransform (GridText.Create (15, count, "AP: "+c.actionPoints));
-			AddToPanelAndTransform (GridText.Create (12, count+1, "OVRWTCH: 1"));
-			count+=2;
+			VectorGui.Label("HP: "+c.healthPoints, 0.25f);
+			VectorGui.Label("AP: "+c.actionPoints, 0.25f);
 		}
 	}
 	public void AddToPanelAndTransform(DisplayElement de){
