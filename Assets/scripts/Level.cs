@@ -20,8 +20,10 @@ public class Level : MonoBehaviour {
 		EXIT
 	}
 	public RL.Map map;
-	public RL.CharacterMap monsterMap, playerMap;
+	public RL.CharacterMap<RLCharacter> monsterMap, playerMap;
+	public RL.CharacterMap<RLItem> itemMap;
 	public List<RLCharacter> players, exitPlayers;
+	public List<RLItem> items;
 	public int currentPlayerCounter = 0;
 	public List<RLCharacter> monsters;
 	FsmSystem fsm;
@@ -88,8 +90,14 @@ public class Level : MonoBehaviour {
 			}
 		}
 		map = new RL.Map (10, 10);
-		monsterMap = new RL.CharacterMap (10, 10);
-		playerMap = new RL.CharacterMap (10, 10);
+		monsterMap = new RL.CharacterMap<RLCharacter> (10, 10);
+		playerMap = new RL.CharacterMap<RLCharacter> (10, 10);
+		itemMap = new RL.CharacterMap<RLItem> (10, 10);
+		items = new List<RLItem> ();
+		monsterMap.Clear ();
+		playerMap.Clear ();
+		itemMap.Clear ();
+
 		monsters = new List<RLCharacter> ();
 		players = new List<RLCharacter> ();
 		// add entrance / exit
@@ -125,6 +133,16 @@ public class Level : MonoBehaviour {
 			gamePanel.Add (monster);
 			monsters.Add (monster);
 		}
+		// add items to the map
+		for (int i = 0; i < 4; i++) {
+			Vector2i monsterPosition = FindOpenPosition ();
+			PowerUp pu = PowerUp.GetPowerup ();
+			RLItem item = (RLItem)RLItem.CreateFromSvg (monsterPosition.x, monsterPosition.y, pu.SvgIcon());
+			item.powerUp = pu;
+			gamePanel.Add (item);
+			items.Add (item);
+		}
+		UpdateMaps ();
 		// check to make sure we can walk from the beginning to the end of the level
 		foreach (RLCharacter p in players) {
 			Vector2i exit = GetPositionOfElement (RL.Objects.EXIT);
@@ -138,7 +156,12 @@ public class Level : MonoBehaviour {
 
 	Vector2i FindOpenPosition(){
 		Vector2i position = new Vector2i (0, 0);
-		while (map [position.x, position.y] != RL.Objects.OPEN) {
+		while (
+			map [position.x, position.y] != RL.Objects.OPEN
+			|| playerMap[position.x, position.y] != null
+			|| monsterMap[position.x, position.y] != null
+			|| itemMap[position.x, position.y] != null
+		) {
 			position = new Vector2i(Random.Range (0, map.sx), Random.Range(0, map.sy));
 		}
 		return position;
@@ -235,6 +258,14 @@ public class Level : MonoBehaviour {
 		if (!deltaD.Equals (new Vector2i (0, 0))) {
 			UpdateMonsterMap ();
 			if (Attack(deltaD, currentPlayer, monsterMap, playerMap) || PlayerMovement (deltaD)) {
+				// check to see if the player is on a powerup, and apply it if they are
+				if (itemMap [currentPlayer.x, currentPlayer.y] != null) {
+					RLItem item = itemMap [currentPlayer.x, currentPlayer.y];
+					items.Remove (item);
+					UpdateMaps ();
+					item.powerUp.OnPickup (currentPlayer);
+					item.Destroy ();
+				}
 				CompletePlayerActions ();
 			}
 		}
@@ -251,13 +282,25 @@ public class Level : MonoBehaviour {
 			}
 		}
 	}
+	public void UpdateMaps(){
+		UpdatePlayerMap ();
+		UpdateMonsterMap ();
+		UpdateItemMap ();
+	}
+	public void UpdateItemMap(){
+		itemMap.Clear ();
+		foreach (RLItem p in items) {
+			itemMap [p.position.x, p.position.y] = p;
+		}
+
+	}
 	public void UpdatePlayerMap(){
 		playerMap.Clear ();
 		foreach (RLCharacter p in players) {
 			playerMap [p.position.x, p.position.y] = p;
 		}
 	}
-	public bool Attack(Vector2i delta, RLCharacter firingCharacter, RL.CharacterMap cMap, RL.CharacterMap blockerMap){
+	public bool Attack(Vector2i delta, RLCharacter firingCharacter, RL.CharacterMap<RLCharacter> cMap, RL.CharacterMap<RLCharacter> blockerMap){
 		// check to see if one of the neighboring cells has a character in it, and attack if so
 		Vector2i currentCell = firingCharacter.position + delta;
 

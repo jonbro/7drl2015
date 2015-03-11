@@ -8,10 +8,10 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 457002}
+  - 114: {fileID: 11457002}
   - 114: {fileID: 11422462}
-  - 114: {fileID: 11436786}
   m_Layer: 0
-  m_Name: wall
+  m_Name: RLItem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -42,9 +42,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: 165e66066f15b4c81a9b312d7cc412ea, type: 2}
   pixelThickness: 2
-  color: {r: .592156887, g: .235898942, b: .137008846, a: 1}
-  SVGFile: {fileID: 4900000, guid: 8aa8cefb9bcfa4baa848bab2d1a18dfa, type: 3}
---- !u!114 &11436786
+  color: {r: 0, g: .686274529, b: .393795341, a: 1}
+  SVGFile: {fileID: 0}
+--- !u!114 &11457002
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -52,7 +52,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 157002}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e624c5d891a6f4c82ac41f2d58827af6, type: 3}
+  m_Script: {fileID: 11500000, guid: 27e325bafca3e4e88ac7a5fd2a19367f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   OnPanels: []

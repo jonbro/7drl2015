@@ -9,6 +9,8 @@ public class Panel : MonoBehaviour {
 		return go.GetComponent<Panel> ();
 	}
 	public void Add(DisplayElement element){
+		if (element.OnPanels.Count == 0)
+			element.transform.SetParent (transform);
 		element.OnPanels.Add (this);
 		elements.Add (element);
 	}

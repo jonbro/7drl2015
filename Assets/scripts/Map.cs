@@ -55,22 +55,22 @@ public struct Vector2i  {
 }
 
 namespace RL{
-	public class CharacterMap{
-		private RLCharacter[,] map;
+	public class CharacterMap<T>{
+		private T[,] map;
 		private int offsetX, offsetY;
 		public CharacterMap(int x, int y, int _offsetX = 0, int _offsetY = 0){
-			map = new RLCharacter[x,y];
+			map = new T[x,y];
 			offsetX = _offsetX;
 			offsetY = _offsetY;
 		}
-		public RLCharacter this[int indexX, int indexY] 
+		public T this[int indexX, int indexY] 
 		{
 			get 
 			{ 
 				if (
 					indexX + offsetX < 0 || indexX + offsetX >= map.GetLength (0)
 					|| indexY + offsetY < 0 || indexY + offsetY >= map.GetLength (1))
-					return null;
+					return default(T);
 				return map[indexX+offsetX, indexY+offsetY]; 
 			}
 			set 
@@ -81,7 +81,7 @@ namespace RL{
 		public void Clear(){
 			for (int x = 0; x < map.GetLength (0); x++) {
 				for (int y = 0; y < map.GetLength (1); y++) {
-					map [x, y] = null;
+					map [x, y] = default(T);
 				}
 			}
 		}

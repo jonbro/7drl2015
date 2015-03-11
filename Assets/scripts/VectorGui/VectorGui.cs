@@ -8,6 +8,7 @@ public class VectorGui : MonoBehaviour {
 	protected LineRenderManager lines;
 	protected Vector2 penPosition;
 	protected Transform penTransform;
+	public static bool ScreenSpace;
 	public static int activeId;
 	public static int currentId;	
 	private static VectorGui instance;
@@ -47,11 +48,15 @@ public class VectorGui : MonoBehaviour {
 			lines = GameObject.Find("LineRenderManager").GetComponent<LineRenderManager>();
 			strings = lines.GetComponent<DrawString>();
 		}
+
 		// reset the start position
-		penPosition = new Vector2(padding, Camera.main.pixelHeight-padding);
+		if(ScreenSpace)
+			penPosition = new Vector2(padding, Camera.main.pixelHeight-padding);
+		else
+			penPosition = new Vector2(0,0);
 	}
 	public static Transform Pen(){
-		Instance.penTransform.position = Camera.main.ScreenToWorldPoint(new Vector3(Instance.penPosition.x, Instance.penPosition.y, 20));
+		Instance.penTransform.position = ConvertPoint(new Vector3(Instance.penPosition.x, Instance.penPosition.y, 20));
 		return Instance.penTransform;
 	}
 	public static void ProgressBar(float ratio, Color color){
@@ -64,8 +69,11 @@ public class VectorGui : MonoBehaviour {
 		// fill the rect with the various bits
 		for(int i=0;i<(int)(50*ratio);i++){
 			float xpos = r.x+200/50.0f*i;
-			lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(xpos, r.y, 20)), Camera.main.ScreenToWorldPoint(new Vector3(xpos, r.yMax, 20)), color);
+			lines.AddLine(ConvertPoint(new Vector3(xpos, r.y, 20)), ConvertPoint(new Vector3(xpos, r.yMax, 20)), color);
 		}
+	}
+	public static void SetPosition(Vector2 p){
+		Instance.penPosition = p;
 	}
 	public static void Label(string LabelText){
 		// draw the label
@@ -87,10 +95,14 @@ public class VectorGui : MonoBehaviour {
 		Vector3 wp = Pen().position;
 		// the text is 3 tall
 		// going with 0.1 as the default line padding
-		wp -= new Vector3(0, scale*3.0f + 0.1f*3.0f, 0);
-		// and move the pen
-		Vector3 sp = Camera.main.WorldToScreenPoint(wp);
-		penPosition = new Vector2(sp.x, sp.y);		
+		if (ScreenSpace) {
+			wp -= new Vector3 (0, scale * 3.0f + 0.1f * 3.0f, 0);
+			// and move the pen
+			Vector3 sp = Camera.main.WorldToScreenPoint (wp);
+			penPosition = new Vector2 (sp.x, sp.y);		
+		} else {
+			penPosition += new Vector2 (0, -scale*3.0f-0.1f);
+		}
 	}
 	public static string TextInput(string inputText){
 		// render a button here
@@ -133,6 +145,8 @@ public class VectorGui : MonoBehaviour {
 			id = GetId();
 		}
 		Rect buttonRect = new Rect(penPosition.x-5, penPosition.y+5-30, 200, 30);
+		if (!ScreenSpace)
+			buttonRect = new Rect (penPosition.x - 0.1f, penPosition.y + 0.1f - 1, 3, 1);
 		bool hovered = false;
 		Color buttonColor = Color.white;
 		if(buttonRect.Contains(Input.mousePosition)){
@@ -142,8 +156,8 @@ public class VectorGui : MonoBehaviour {
 		// draw the outlines of the button
 		DrawRect(buttonRect, buttonColor);
 		// draw the button shadown
-		lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(buttonRect.x, buttonRect.y+2, 20)), Camera.main.ScreenToWorldPoint(new Vector3(buttonRect.xMax-2, buttonRect.y+2, 20)), buttonColor*0.5f);
-		lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(buttonRect.x, buttonRect.yMax, 20)), Camera.main.ScreenToWorldPoint(new Vector3(buttonRect.x, buttonRect.y+2, 20)), buttonColor*0.5f);
+		lines.AddLine(ConvertPoint(new Vector3(buttonRect.x, buttonRect.y+2, 20)), ConvertPoint(new Vector3(buttonRect.xMax-2, buttonRect.y+2, 20)), buttonColor*0.5f);
+		lines.AddLine(ConvertPoint(new Vector3(buttonRect.x, buttonRect.yMax, 20)), ConvertPoint(new Vector3(buttonRect.x, buttonRect.y+2, 20)), buttonColor*0.5f);
 
 
 		// draw a label for this button
@@ -159,9 +173,15 @@ public class VectorGui : MonoBehaviour {
 		return false;
 	}
 	public void DrawRect(Rect r, Color c){
-		lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(r.x, r.y, 20)), Camera.main.ScreenToWorldPoint(new Vector3(r.xMax, r.y, 20)), c);
-		lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(r.xMax, r.y, 20)), Camera.main.ScreenToWorldPoint(new Vector3(r.xMax, r.yMax, 20)), c);
-		lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(r.xMax, r.yMax, 20)), Camera.main.ScreenToWorldPoint(new Vector3(r.x, r.yMax, 20)), c);
-		lines.AddLine(Camera.main.ScreenToWorldPoint(new Vector3(r.x, r.yMax, 20)), Camera.main.ScreenToWorldPoint(new Vector3(r.x, r.y, 20)), c);
+		lines.AddLine(ConvertPoint(new Vector3(r.x, r.y, 20)), ConvertPoint(new Vector3(r.xMax, r.y, 20)), c);
+		lines.AddLine(ConvertPoint(new Vector3(r.xMax, r.y, 20)), ConvertPoint(new Vector3(r.xMax, r.yMax, 20)), c);
+		lines.AddLine(ConvertPoint(new Vector3(r.xMax, r.yMax, 20)), ConvertPoint(new Vector3(r.x, r.yMax, 20)), c);
+		lines.AddLine(ConvertPoint(new Vector3(r.x, r.yMax, 20)), ConvertPoint(new Vector3(r.x, r.y, 20)), c);
+	}
+	static Vector3 ConvertPoint(Vector3 v){
+		if(ScreenSpace){
+			return Camera.main.ScreenToWorldPoint(v);
+		}
+		return v;
 	}
 }

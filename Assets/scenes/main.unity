@@ -236,7 +236,7 @@ MonoBehaviour:
   stop: {fileID: 0}
   offset: {x: .00100000005, y: .00100000005}
   fade: 0
-  phase: 154.243561
+  phase: 209.147797
   phasePerSecond: .5
   scrollPerSecond: {x: .0199999996, y: .0399999991}
   center: {fileID: 2114070967}
