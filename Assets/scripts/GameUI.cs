@@ -47,8 +47,10 @@ public class GameUI : MonoBehaviour
 			}
 		}
 		// display the console with the current state of the game
+		VectorGui.SetPosition (new Vector2(-.35f, -7.65f));
+		VectorGui.Label ("Score: "+level.score, 0.1f, Color.white);
 		if (level.monsters.Count == 0) {
-			VectorGui.SetPosition (new Vector2(-.35f, -8.65f));
+			VectorGui.Label ("-1 Score Per Player Turn", 0.1f, Color.white);
 			VectorGui.Label ("Press Space to go to next level", 0.1f, Color.white);
 		}
 	}

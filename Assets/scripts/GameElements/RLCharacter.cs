@@ -72,7 +72,7 @@ public class RLCharacter : DisplayElement
 		get { return _healthPoints; }
 		set {
 			// attach the action point display if required,
-			_healthPoints = value;
+			_healthPoints = Mathf.Min(3, value);
 			if (healthPointDisplay == null) {
 				healthPointDisplay = GridSVG.CreateFromSvg (x, y, "HP_3").GetComponent<SvgRenderer>();
 				GameObject healthPointDisplayGO = healthPointDisplay.gameObject;

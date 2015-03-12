@@ -37,6 +37,8 @@ public class Level : MonoBehaviour {
 	public int currentLevel = 0;
 	public int sx = 8;
 	public int sy = 8;
+	public int score = 5;
+
 	public void Build(Panel _gamePanel){
 		gamePanel = _gamePanel;
 		highlightPanel = Panel.Create();
@@ -152,9 +154,10 @@ public class Level : MonoBehaviour {
 			monster.color = GameColors.GetColor ("enemy");
 			gamePanel.Add (monster);
 			monsters.Add (monster);
+			UpdateMaps ();
 		}
 		// add items to the map
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 2; i++) {
 			Vector2i monsterPosition = FindOpenPosition ();
 			PowerUp pu = PowerUp.GetPowerup ();
 			RLItem item = (RLItem)RLItem.CreateFromSvg (monsterPosition.x, monsterPosition.y, pu.SvgIcon());
@@ -281,7 +284,7 @@ public class Level : MonoBehaviour {
 		if (currentPlayer.canUsePowerup && nextInput == PlayerInput.POWER1 || nextInput == PlayerInput.POWER2) {
 			int powerSlot = (nextInput == PlayerInput.POWER1) ? 0 : 1;
 			// check to see if the player has a power in the current slot, and use it if so
-			if (currentPlayer.powerups [powerSlot] != null && currentPlayer.powerups [powerSlot].OnUse (currentPlayer)) {
+			if (currentPlayer.powerups [powerSlot] != null && currentPlayer.powerups [powerSlot].OnUse (currentPlayer, this)) {
 				currentPlayer.actionPoints = 1;
 				CompletePlayerActions ();
 			}
@@ -299,7 +302,7 @@ public class Level : MonoBehaviour {
 					items.Remove (item);
 					UpdateMaps ();
 					// is this an item that takes up inventory slots
-					if (item.powerUp.OnPickup (currentPlayer)) {
+					if (item.powerUp.OnPickup (currentPlayer, this)) {
 						currentPlayer.powerups.Add (item.powerUp);
 						if (currentPlayer.powerups.Count == 3) {
 							// only allow 2 powers per player
@@ -323,6 +326,9 @@ public class Level : MonoBehaviour {
 		UpdatePlayerMap ();
 		currentPlayer.actionPoints--;
 		if (currentPlayer.actionPoints <= 0) {
+			if (monsters.Count <= 0) {
+				score--;
+			}
 			currentPlayerCounter = currentPlayerCounter + 1;
 			if (currentPlayerCounter > players.Count - 1) {
 				fsm.PerformTransition (FsmTransitionId.Complete);
