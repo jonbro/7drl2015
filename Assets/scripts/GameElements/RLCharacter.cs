@@ -5,6 +5,7 @@ using System;
 
 public class RLCharacter : DisplayElement
 {
+	public List<PowerUp> powerups = new List<PowerUp>();
 	SpriteRenderer actionPointDisplay, overwatchDisplay;
 	SvgRenderer healthPointDisplay;
 	public int x {
@@ -39,7 +40,12 @@ public class RLCharacter : DisplayElement
 			}
 		}
 	}
-
+	public Color color{
+		set { 
+			originalColor = value;
+			GetComponent<SvgRenderer>().colorProperty = originalColor;
+		}
+	}
 	bool _overwatch = false;
 	public bool overwatch{
 		get { return _overwatch; }

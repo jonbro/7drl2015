@@ -18,13 +18,15 @@ public class GameUI : MonoBehaviour
 			vPosition -= 1;
 			Color color = Color.white;
 			if (c == level.currentPlayer)
-				color = Color.green;
+				color = GameColors.GetColor("player");
 			VectorGui.Label("HP:"+c.healthPoints, 0.1f, color);
 			VectorGui.Label("AP:"+c.actionPoints, 0.1f, color);
 
+			VectorGui.SetPosition (new Vector2 (10.65f, vPosition));
 			// display the powers the player can use
-			VectorGui.SetPosition (new Vector2(10.65f, vPosition));
-			VectorGui.Label("1:OVRWTCH", 0.1f, color);
+			for (int i = 0; i < c.powerups.Count; i++) {
+				VectorGui.Label ((i+1)+":"+c.powerups[i].DisplayText(), 0.1f, color);
+			}
 			vPosition -= 1;
 		}
 	}

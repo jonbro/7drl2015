@@ -2,6 +2,11 @@
 using System.Collections;
 
 public class GridSVG : DisplayElement {
+	public Color color{
+		set{
+			GetComponent<SvgRenderer> ().colorProperty = value;
+		}
+	}
 	public static GridSVG CreateFromSvg(int x, int y, string resourceName, Grid.Offset _offset = Grid.Offset.CENTER){
 		GameObject go = (GameObject)(Instantiate(Resources.Load("GridSvg") as GameObject, Grid.GridToWorld(x,y)+Grid.OffsetToVector(_offset), Quaternion.identity));
 		GridSVG gs = go.GetComponent<GridSVG>();
@@ -12,4 +17,5 @@ public class GridSVG : DisplayElement {
 		GameObject go = (GameObject)(Instantiate(Resources.Load(resourceName) as GameObject, Grid.GridToWorld(x,y)+Grid.OffsetToVector(_offset), Quaternion.identity));
 		return go.GetComponent<GridSVG>();
 	}
+
 }

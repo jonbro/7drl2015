@@ -8,7 +8,8 @@ public enum PlayerInput
 	DOWN,
 	LEFT,
 	RIGHT,
-	OVERWATCH,
+	POWER1,
+	POWER2,
 	NONE
 }
 
@@ -32,6 +33,7 @@ public class Level : MonoBehaviour {
 	public System.Action OnGameOver;
 	Panel gamePanel;
 	public RLCharacter currentPlayer;
+	public int currentLevel = 0;
 	public void Build(Panel _gamePanel){
 		gamePanel = _gamePanel;
 		ui = ((GameObject)Instantiate((Resources.Load ("UI") as GameObject))).GetComponent<GameUI>();
@@ -64,9 +66,12 @@ public class Level : MonoBehaviour {
 	public void InitialGen(){
 		for (int i = 0; i < 3; i++) {
 			RLCharacter player = RLCharacter.Create (0, 0, "Player");
+			player.powerups.Add (new PUEndTurn ());
 			exitPlayers.Add (player);
+			player.color = GameColors.GetColor ("player");
 			player.gameObject.name = "player"+i;
 		}
+		currentLevel = 0;
 		fsm.PerformTransition (FsmTransitionId.Complete);
 	}
 	public void GenLevel(){
@@ -77,6 +82,7 @@ public class Level : MonoBehaviour {
 			UpdateMapDisplay ();
 			yield return new WaitForSeconds (0.25f);
 		}
+		currentLevel++;
 		exitPlayers.Clear ();
 		UpdateMapDisplay ();
 		fsm.PerformTransition (FsmTransitionId.Complete);
@@ -127,9 +133,10 @@ public class Level : MonoBehaviour {
 		currentPlayerCounter = 0;
 		currentPlayer = players[currentPlayerCounter];
 
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < (currentLevel+1); i++) {
 			Vector2i monsterPosition = FindOpenPosition ();
 			RLCharacter monster = RLCharacter.Create (monsterPosition.x, monsterPosition.y, "Enemy");
+			monster.color = GameColors.GetColor ("enemy");
 			gamePanel.Add (monster);
 			monsters.Add (monster);
 		}
@@ -139,10 +146,11 @@ public class Level : MonoBehaviour {
 			PowerUp pu = PowerUp.GetPowerup ();
 			RLItem item = (RLItem)RLItem.CreateFromSvg (monsterPosition.x, monsterPosition.y, pu.SvgIcon());
 			item.powerUp = pu;
+			item.color = GameColors.GetColor ("powerup");
 			gamePanel.Add (item);
 			items.Add (item);
+			UpdateMaps ();
 		}
-		UpdateMaps ();
 		// check to make sure we can walk from the beginning to the end of the level
 		foreach (RLCharacter p in players) {
 			Vector2i exit = GetPositionOfElement (RL.Objects.EXIT);
@@ -233,7 +241,10 @@ public class Level : MonoBehaviour {
 			nextInput = PlayerInput.LEFT;
 		}
 		if (Input.GetKeyDown (KeyCode.Alpha1)) {
-			nextInput = PlayerInput.OVERWATCH;
+			nextInput = PlayerInput.POWER1;
+		}
+		if (Input.GetKeyDown (KeyCode.Alpha2)) {
+			nextInput = PlayerInput.POWER2;
 		}
 
 		// convert input into delta positions for easier map movement
@@ -250,10 +261,13 @@ public class Level : MonoBehaviour {
 		if (nextInput == PlayerInput.LEFT) {
 			deltaD = new Vector2i (-1, 0);
 		}
-		if (nextInput == PlayerInput.OVERWATCH) {
-			currentPlayer.overwatch = true;
-			currentPlayer.actionPoints = 1;
-			CompletePlayerActions ();
+		if (nextInput == PlayerInput.POWER1 || nextInput == PlayerInput.POWER2) {
+			int powerSlot = (nextInput == PlayerInput.POWER1) ? 0 : 1;
+			// check to see if the player has a power in the current slot, and use it if so
+			if (currentPlayer.powerups [powerSlot] != null && currentPlayer.powerups [powerSlot].OnUse (currentPlayer)) {
+				currentPlayer.actionPoints = 1;
+				CompletePlayerActions ();
+			}
 		}
 		if (!deltaD.Equals (new Vector2i (0, 0))) {
 			UpdateMonsterMap ();
@@ -263,7 +277,14 @@ public class Level : MonoBehaviour {
 					RLItem item = itemMap [currentPlayer.x, currentPlayer.y];
 					items.Remove (item);
 					UpdateMaps ();
-					item.powerUp.OnPickup (currentPlayer);
+					// is this an item that takes up inventory slots
+					if (item.powerUp.OnPickup (currentPlayer)) {
+						currentPlayer.powerups.Add (item.powerUp);
+						if (currentPlayer.powerups.Count == 3) {
+							// only allow 2 powers per player
+							currentPlayer.powerups.RemoveAt (0);
+						}
+					}
 					item.Destroy ();
 				}
 				CompletePlayerActions ();
@@ -464,15 +485,19 @@ public class Level : MonoBehaviour {
 	public void UpdateMapDisplay(){
 		for (int x = 0; x < 10; x++) {
 			for (int y = 0; y < 10; y++) {
+				GridSVG svg;
 				switch (map [x, y]) {
 				case RL.Objects.WALL:
-					gamePanel.Add(GridSVG.Create (x, y, "wall"));
+					svg = (GridSVG)gamePanel.Add (GridSVG.Create (x, y, "wall"));
+					svg.color = GameColors.GetColor ("wall");
 					break;
 				case RL.Objects.ENTRANCE:
-					gamePanel.Add(GridSVG.Create (x, y, "airlock"));
+					svg = (GridSVG)gamePanel.Add(GridSVG.Create (x, y, "airlock"));
+					svg.color = GameColors.GetColor ("wall");
 					break;
 				case RL.Objects.EXIT:
-					gamePanel.Add(GridSVG.Create (x, y, "airlock"));
+					svg = (GridSVG)gamePanel.Add(GridSVG.Create (x, y, "airlock"));
+					svg.color = GameColors.GetColor ("wall");
 					break;
 				}
 			}

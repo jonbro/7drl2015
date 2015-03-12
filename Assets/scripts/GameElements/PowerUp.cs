@@ -2,23 +2,23 @@
 using System.Collections;
 
 public class PowerUp {
-	private string _displayText;
-	public string displayText{
-		set{ _displayText = value; }
-		get{ return _displayText; }
-	}
 	private string _descriptionText;
 	public string descriptionText{
 		set{ _descriptionText = value; }
 		get{ return _descriptionText; }
 	}
 	virtual public bool OnPickup (RLCharacter c){ return false; }
-	virtual public bool OnUse (){ return false; }
+	virtual public bool OnUse (RLCharacter c){ return false; }
 	virtual public string SvgIcon(){
 		return "";
 	}
+	virtual public string DisplayText(){
+		return "";
+	}
 	public static PowerUp GetPowerup(){
-		switch (Random.Range (0, 2)) {
+		switch (Random.Range (0, 3)) {
+		case 0:
+			return new PUEndTurn ();
 		case 1:
 			return new PUHealthUp ();
 		default:
@@ -28,14 +28,32 @@ public class PowerUp {
 }
 
 public class PUOverwatch : PowerUp {
-	public string displayText = "OVRWTCH";
+	override public string DisplayText(){ return "OVRWTCH"; }
 	public string descriptionText = "END TURN AND FIRE IN RANGE ON ENEMY TURN";
 	override public string SvgIcon(){
 		return "Overwatch";
 	}
+	override public bool OnPickup(RLCharacter c){
+		return true;
+	}
+	override public bool OnUse(RLCharacter c){
+		c.overwatch = true;
+		return true;
+	}
+}
+public class PUEndTurn : PowerUp {
+	public string descriptionText = "END TURN";
+	override public string SvgIcon(){ return "EndTurn"; }
+	override public string DisplayText(){ return"END"; }
+	override public bool OnPickup(RLCharacter c){
+		return true;
+	}
+	override public bool OnUse(RLCharacter c){
+		return true;
+	}
 }
 public class PUHealthUp : PowerUp {
-	public string displayText = "INCREASE HEALTH";
+	override public string DisplayText(){ return "ADD HP"; }
 	public string descriptionText = "IMMEDIATELY ADD 2 TO HEALTH";
 	override public string SvgIcon(){
 		return "HealthUp";

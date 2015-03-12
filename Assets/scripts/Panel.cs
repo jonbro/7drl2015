@@ -8,10 +8,11 @@ public class Panel : MonoBehaviour {
 		GameObject go = (GameObject)(Instantiate(Resources.Load("Panel") as GameObject, Vector3.zero, Quaternion.identity));
 		return go.GetComponent<Panel> ();
 	}
-	public void Add(DisplayElement element){
+	public DisplayElement Add(DisplayElement element){
 		if (element.OnPanels.Count == 0)
 			element.transform.SetParent (transform);
 		element.OnPanels.Add (this);
 		elements.Add (element);
+		return element;
 	}
 }
