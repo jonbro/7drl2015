@@ -16,6 +16,19 @@ public class RLCharacter : DisplayElement
 		get { return position.y; }
 	}
 	// overlay gfx, could potentially abstract?
+	int _maxActionPoints = 2;
+	public int maxActionPoints {
+		get{ 
+			int tempMax = _maxActionPoints;
+			foreach (PowerUp p in powerups) {
+				tempMax += p.actionPointModifier;
+			}
+			return tempMax;
+		}
+		set{
+			_maxActionPoints = value;
+		}
+	}
 	int _actionPoints = 2;
 	public int actionPoints{
 		get { return _actionPoints; }
@@ -71,6 +84,10 @@ public class RLCharacter : DisplayElement
 		get { return _healthPoints; }
 		set {
 			// attach the action point display if required,
+			if (value < _healthPoints) {
+				Debug.Log ("showing attack?");
+				Compression.PopBlur (transform, 0.9f, 1.25f, .8f);
+			}
 			_healthPoints = Mathf.Min(3, value);
 			if (healthPointDisplay == null) {
 				healthPointDisplay = GridSVG.CreateFromSvg (x, y, "HP_3").GetComponent<SvgRenderer>();

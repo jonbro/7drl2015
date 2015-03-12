@@ -21,19 +21,20 @@ public class Compression : ImageEffectBase {
 		instance = this;
 	}
 	public static void PopBlur(Transform target, float amount, float time, float minTarget = 0.5f){
-		instance.center.SetParent (target, false);
 		instance.center.transform.localPosition = Vector3.zero;
-		instance.StartCoroutine(instance.PopBlurCoro(amount, time, minTarget));
+		instance.StartCoroutine(instance.PopBlurCoro(amount, time, minTarget, target));
 	}
-	IEnumerator PopBlurCoro(float amount, float time, float minTarget){
+	IEnumerator PopBlurCoro(float amount, float time, float minTarget, Transform targetCenter){
 		float startTime = Time.time;
+		minTarget = Mathf.Max (0.7f, minTarget);
 		while (Time.time - startTime < time) {
 			float percent = (Time.time - startTime)/time;
 			fade = Mathf.Lerp (amount, minTarget, percent);
 			yield return new WaitForEndOfFrame ();
 		}
-		center.SetParent(transform);
-		fade = 0;
+		if(targetCenter != null)
+			center.transform.position = targetCenter.position;
+		fade = 0.7f;
 	}
 	// Called by camera to apply image effect
 	void OnRenderImage (RenderTexture source, RenderTexture destination) {

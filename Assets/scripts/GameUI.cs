@@ -7,6 +7,7 @@ public class GameUI : MonoBehaviour
 {
 	Level level;
 	Panel panel;
+	List<string> itemDescription = new List<string>();
 	public void Setup(Level _level){
 		panel = Panel.Create();
 		level = _level;
@@ -31,19 +32,27 @@ public class GameUI : MonoBehaviour
 			vPosition -= 2;
 		}
 		// determine if there is a character underneath the cursor, and display the range highlights if so
-		string itemDescription = "";
 		Vector2i mp = Grid.WorldToGrid (Camera.main.ScreenToWorldPoint (new Vector3(Input.mousePosition.x, Input.mousePosition.y)));
+		bool displayHighlights = false;
 		if (
 			(!lastPosition.Equals(mp))
 			&& mp.x >= 0 && mp.x < level.sx
 			&& mp.y >= 0 && mp.y < level.sy
 		){
+			itemDescription.Clear ();
 			lastPosition = mp;
 			if (level.playerMap [mp.x, mp.y] != null) {
 				level.playerMap [mp.x, mp.y].DisplayFireRadius (level.map, level.monsterMap, level.highlights);
-			} else if(level.monsterMap [mp.x, mp.y] != null) {
+				displayHighlights = true;
+			} 
+			if(level.monsterMap [mp.x, mp.y] != null) {
 				level.monsterMap [mp.x, mp.y].DisplayFireRadius (level.map, level.playerMap, level.highlights);
-			}else {
+				displayHighlights = true;
+			}
+			if(level.itemMap [mp.x, mp.y] != null) {
+				itemDescription.Add (level.itemMap [mp.x, mp.y].powerUp.DescriptionText());
+			}
+			if(!displayHighlights){
 				level.HideHighlights ();
 			}
 		}
@@ -52,11 +61,12 @@ public class GameUI : MonoBehaviour
 		VectorGui.SetPosition (new Vector2(-6.35f, 0.35f));
 		VectorGui.Label ("ARROW: Move-Atk", 0.1f, Color.white);
 		VectorGui.Label ("TAB: Next Unit", 0.1f, Color.white);
+		VectorGui.Label ("MOUSE: Get Info", 0.1f, Color.white);
 
 		VectorGui.SetPosition (new Vector2(-.35f, -7.65f));
-		VectorGui.Label ("Score: "+level.score, 0.1f, Color.white);
-		if (itemDescription != "") {
-			VectorGui.Label (itemDescription, 0.1f, Color.white);
+		VectorGui.Label (System.String.Format("Score: {0} Level: {1}", level.score, level.currentLevel), 0.1f, Color.white);
+		foreach (String description in itemDescription) {
+			VectorGui.Label (description, 0.1f, Color.white);
 		}
 		if (level.monsters.Count == 0) {
 			VectorGui.Label ("-1 Score Per Player Turn", 0.1f, Color.white);

@@ -229,7 +229,7 @@ public class Level : MonoBehaviour {
 	}
 	public void PlayerSetup(){
 		foreach (RLCharacter p in players) {
-			p.actionPoints = 2;
+			p.actionPoints = p.maxActionPoints;
 			p.SetState("overwatch", false);
 			p.canUsePowerup = true;
 		}

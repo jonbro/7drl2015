@@ -2,10 +2,8 @@
 using System.Collections;
 
 public class PowerUp {
-	private string _descriptionText;
-	public string descriptionText{
-		set{ _descriptionText = value; }
-		get{ return _descriptionText; }
+	virtual public string DescriptionText(){
+		return "";
 	}
 	virtual public bool OnPickup (RLCharacter c, Level level){ return false; }
 	virtual public bool OnUse (RLCharacter c, Level level){ return false; }
@@ -15,6 +13,7 @@ public class PowerUp {
 	virtual public string DisplayText(){
 		return "";
 	}
+	public int actionPointModifier;
 	public static PowerUp GetPowerup(){
 		switch (Random.Range (0, 6)) {
 		case 0:
@@ -35,7 +34,9 @@ public class PowerUp {
 
 public class PUOverwatch : PowerUp {
 	override public string DisplayText(){ return "OVRWTCH"; }
-	public string descriptionText = "END TURN AND FIRE IN RANGE ON ENEMY TURN";
+	override public string DescriptionText(){
+		return "END TURN AND FIRE IN RANGE ON ENEMY TURN";
+	}
 	override public string SvgIcon(){
 		return "Overwatch";
 	}
@@ -49,9 +50,11 @@ public class PUOverwatch : PowerUp {
 	}
 }
 public class PUEndTurn : PowerUp {
-	public string descriptionText = "END TURN";
+	override public string DescriptionText(){
+		return "END TURN";
+	}
 	override public string SvgIcon(){ return "EndTurn"; }
-	override public string DisplayText(){ return"END"; }
+	override public string DisplayText(){ return "END"; }
 	override public bool OnPickup (RLCharacter c, Level level){
 		return true;
 	}
@@ -61,7 +64,9 @@ public class PUEndTurn : PowerUp {
 }
 public class PUHealthUp : PowerUp {
 	override public string DisplayText(){ return "ADD HP"; }
-	public string descriptionText = "IMMEDIATELY ADD 2 TO HEALTH";
+	override public string DescriptionText(){
+		return "IMMEDIATELY ADD 2 TO HEALTH";
+	}
 	override public string SvgIcon(){
 		return "HealthUp";
 	}
@@ -73,7 +78,9 @@ public class PUHealthUp : PowerUp {
 }
 public class PUScoreUp : PowerUp {
 	override public string DisplayText(){ return "SCORE UP"; }
-	public string descriptionText = "ADD 3 TO SCORE";
+	override public string DescriptionText(){
+		return "ADD 4 TO SCORE";
+	}
 	override public string SvgIcon(){
 		return "scoreToken";
 	}
@@ -85,7 +92,9 @@ public class PUScoreUp : PowerUp {
 }
 public class PUFastMove : PowerUp {
 	override public string DisplayText(){ return "MOVE FAST"; }
-	public string descriptionText = "MOVE REALLY FAST IN DIRECTION";
+	override public string DescriptionText(){
+		return "MOVE REALLY FAST IN DIRECTION";
+	}
 	override public string SvgIcon(){
 		return "fastMove";
 	}
@@ -102,8 +111,9 @@ public class PUFastMove : PowerUp {
 public class PUDelayedHeal : PowerUp {
 	int charges = 3;
 	override public string DisplayText(){ return "HEAL NEIGHBORS ("+charges+")"; }
-	public string descriptionText = "HEAL NEIGHBORS";
-
+	override public string DescriptionText(){
+		return "HEAL NEIGHBORS";
+	}
 	override public string SvgIcon(){
 		return "delayedHeal";
 	}
@@ -130,22 +140,20 @@ public class PUDelayedHeal : PowerUp {
 }
 public class PUAPRefresh : PowerUp {
 	int charges = 3;
-	override public string DisplayText(){ return "REFRESH AP ("+charges+")"; }
-	public string descriptionText = "SET AP MAX";
+	override public string DisplayText(){ return "PSV AP+1"; }
+	override public string DescriptionText(){
+		return "AP MAX+1";
+	}
 
 	override public string SvgIcon(){
 		return "apRefresh";
 	}
 	override public bool OnPickup (RLCharacter c, Level level){
+		c.actionPoints++;
+		this.actionPointModifier = 1;
 		return true;
 	}
 	override public bool OnUse (RLCharacter c, Level level){
-		// check to see if there are any neighbors, and heal them if so
-		c.actionPoints = 3;
-		charges--;
-		if (charges <= 0) {
-			c.powerups.Remove (this);
-		}
 		return false;
 	}
 }
