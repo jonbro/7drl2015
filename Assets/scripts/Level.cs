@@ -23,6 +23,7 @@ public class Level : MonoBehaviour {
 	public RL.Map map;
 	public RL.CharacterMap<RLCharacter> monsterMap, playerMap;
 	public RL.CharacterMap<RLItem> itemMap;
+	public RL.CharacterMap<RLHighlight> highlights;
 	public List<RLCharacter> players, exitPlayers;
 	public List<RLItem> items;
 	public int currentPlayerCounter = 0;
@@ -31,11 +32,14 @@ public class Level : MonoBehaviour {
 	GameUI ui;
 	RL.Pathfinder pf = new RL.Pathfinder ();
 	public System.Action OnGameOver;
-	Panel gamePanel;
+	Panel gamePanel, highlightPanel;
 	public RLCharacter currentPlayer;
 	public int currentLevel = 0;
+	public int sx = 10;
+	public int sy = 10;
 	public void Build(Panel _gamePanel){
 		gamePanel = _gamePanel;
+		highlightPanel = Panel.Create();
 		ui = ((GameObject)Instantiate((Resources.Load ("UI") as GameObject))).GetComponent<GameUI>();
 		ui.Setup (this);
 		fsm = new FsmSystem ();
@@ -70,6 +74,16 @@ public class Level : MonoBehaviour {
 			exitPlayers.Add (player);
 			player.color = GameColors.GetColor ("player");
 			player.gameObject.name = "player"+i;
+		}
+		highlights = new RL.CharacterMap<RLHighlight>(10, 10);
+		// setup the highlights
+		for (int x = 0; x < 10; x++) {
+			for (int y = 0; y < 10; y++) {
+				RLHighlight highlight = RLHighlight.CreateFromSvg (x,y, "highlight");
+				highlight.color = Color.clear;
+				highlightPanel.Add (highlight);
+				highlights [x, y] = highlight;
+			}
 		}
 		currentLevel = 0;
 		fsm.PerformTransition (FsmTransitionId.Complete);
@@ -155,8 +169,10 @@ public class Level : MonoBehaviour {
 		foreach (RLCharacter p in players) {
 			Vector2i exit = GetPositionOfElement (RL.Objects.EXIT);
 			List<Vector2i> path = pf.FindPath (p.position, exit, OneCostFunction, map); 
-			if (HasPath (path, exit)) {
+			if (HasPath (path, p.position, exit)) {
 				return true;
+			} else {
+				return false;
 			}
 		}
 		return false;
@@ -196,8 +212,8 @@ public class Level : MonoBehaviour {
 	int OneCostFunction(int x, int y){
 		return 1;
 	}
-	bool HasPath(List<Vector2i> path, Vector2i endPoint){
-		return path.Count > 0 && path [path.Count - 1].Equals (endPoint);
+	bool HasPath(List<Vector2i> path, Vector2i startPoint, Vector2i endPoint){
+		return path.Count > 0 && path [path.Count - 1].Equals (endPoint) && path[0].Equals(startPoint);
 	}
 	public void PlayerSetup(){
 		foreach (RLCharacter p in players) {
@@ -324,8 +340,13 @@ public class Level : MonoBehaviour {
 	public bool Attack(Vector2i delta, RLCharacter firingCharacter, RL.CharacterMap<RLCharacter> cMap, RL.CharacterMap<RLCharacter> blockerMap){
 		// check to see if one of the neighboring cells has a character in it, and attack if so
 		Vector2i currentCell = firingCharacter.position + delta;
-
-		while (map.IsValidTile(currentCell.x, currentCell.y) && map [currentCell.x, currentCell.y] == RL.Objects.OPEN && blockerMap[currentCell.x, currentCell.y] == null) {
+		int count = 1;
+		while (
+			map.IsValidTile(currentCell.x, currentCell.y) 
+			&& map [currentCell.x, currentCell.y] == RL.Objects.OPEN
+			&& blockerMap[currentCell.x, currentCell.y] == null
+			&& count < firingCharacter.fireRange
+		){
 
 			RLCharacter enemy = cMap [currentCell.x, currentCell.y];
 			if (enemy != null) {
@@ -500,6 +521,13 @@ public class Level : MonoBehaviour {
 					svg.color = GameColors.GetColor ("wall");
 					break;
 				}
+			}
+		}
+	}
+	public void HideHighlights(){
+		for (int x = 0; x < 10; x++) {
+			for (int y = 0; y < 10; y++) {
+				highlights [x, y].color = Color.clear;
 			}
 		}
 	}

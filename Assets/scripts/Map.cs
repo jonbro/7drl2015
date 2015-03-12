@@ -85,6 +85,12 @@ namespace RL{
 				}
 			}
 		}
+		public int sizeX{
+			get { return map.GetLength (0);}
+		}
+		public int sizeY{
+			get { return map.GetLength (1);}
+		}
 	}
 	public delegate int CostCallback(int x, int y);
 	[System.Serializable]

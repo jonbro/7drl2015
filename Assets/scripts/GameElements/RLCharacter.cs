@@ -46,6 +46,7 @@ public class RLCharacter : DisplayElement
 			GetComponent<SvgRenderer>().colorProperty = originalColor;
 		}
 	}
+	public int fireRange = 3;
 	bool _overwatch = false;
 	public bool overwatch{
 		get { return _overwatch; }
@@ -111,6 +112,25 @@ public class RLCharacter : DisplayElement
 	void Update(){
 		if (current) {
 			GetComponent<SvgRenderer>().colorProperty = Color.Lerp (Color.clear, originalColor, ((Mathf.Sin (Time.time*5f) + 1)*0.5f) * 0.5f + 0.5f);
+		}
+	}
+	public void DisplayFireRadius(RL.Map map, RL.CharacterMap<RLCharacter> enemyMap, RL.CharacterMap<RLHighlight> highlights){
+		for (int x = 0; x < highlights.sizeX; x++) {
+			for (int y = 0; y < highlights.sizeY; y++) {
+				highlights [x, y].color = Color.clear;
+			}
+		}
+		// check to see if one of the neighboring cells has a character in it, and attack if so
+		for (int i = 0; i < 4; i++) {
+			Vector2i delta = new Vector2i (RL.Map.nDir [i, 0], RL.Map.nDir [i, 1]);
+			Vector2i currentCell = position + delta;
+			int count = 1;
+			while (map.IsValidTile (currentCell.x, currentCell.y) && map [currentCell.x, currentCell.y] == RL.Objects.OPEN && count < fireRange) {
+				count++;
+				RLCharacter enemy = enemyMap [currentCell.x, currentCell.y];
+				highlights [currentCell.x, currentCell.y].color = Color.red;
+				currentCell += delta;
+			}
 		}
 	}
 }

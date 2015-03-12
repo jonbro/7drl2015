@@ -36,6 +36,10 @@ public class Grid : MonoBehaviour {
 	public static Vector3 GridToWorld(int x, int y){
 		return GridToWorld (new Vector2 (x, y));
 	}
+	public static Vector2i WorldToGrid(Vector3 v){
+		return new Vector2i (Mathf.RoundToInt(v.x), -Mathf.RoundToInt(v.y));
+	}
+
 	public static void SetCameraSize(int _gridSizeX, int _gridSizeY, float paddingX, float paddingY){
 		Camera cam = Camera.main;
 		gridSizeX = _gridSizeX;
