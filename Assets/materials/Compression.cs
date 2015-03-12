@@ -4,6 +4,8 @@ using System.Collections;
 [ExecuteInEditMode]
 [AddComponentMenu("Image Effects/Cale/Compression")]
 public class Compression : ImageEffectBase {
+	static Compression instance;
+
 	RenderTexture  accumTexture;
 	public Texture flow;
 	public Texture stop;
@@ -15,7 +17,24 @@ public class Compression : ImageEffectBase {
 	Vector2 scroll = Vector2.zero;
 	public Transform center;
 
-	
+	void Awake(){
+		instance = this;
+	}
+	public static void PopBlur(Transform target, float amount, float time, float minTarget = 0.5f){
+		instance.center.SetParent (target, false);
+		instance.center.transform.localPosition = Vector3.zero;
+		instance.StartCoroutine(instance.PopBlurCoro(amount, time, minTarget));
+	}
+	IEnumerator PopBlurCoro(float amount, float time, float minTarget){
+		float startTime = Time.time;
+		while (Time.time - startTime < time) {
+			float percent = (Time.time - startTime)/time;
+			fade = Mathf.Lerp (amount, minTarget, percent);
+			yield return new WaitForEndOfFrame ();
+		}
+		center.SetParent(transform);
+		fade = 0;
+	}
 	// Called by camera to apply image effect
 	void OnRenderImage (RenderTexture source, RenderTexture destination) {
 		scroll.x+=scrollPerSecond.x*Time.deltaTime;

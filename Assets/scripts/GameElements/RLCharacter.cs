@@ -90,7 +90,9 @@ public class RLCharacter : DisplayElement
 		get{ return _position; }
 		set{
 			_position = value;
-			transform.position = Grid.GridToWorld (_position.x, _position.y);
+			LeanTween.cancel (gameObject);
+			Compression.PopBlur (transform, 0.9f, 0.25f);
+			LeanTween.move (gameObject, Grid.GridToWorld (_position.x, _position.y), 0.125f);
 		}
 	}
 	string currentDisplayState = "";
@@ -177,6 +179,7 @@ public class RLCharacter : DisplayElement
 			}
 			position = lastPosition;
 			SetState ("fastMove", false);
+			Compression.PopBlur (transform, 1f, 2.5f);
 			return true;
 		}
 		return false;
