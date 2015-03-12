@@ -49,8 +49,8 @@ public class GameRunner : MonoBehaviour {
 		SetupTitle ();
 	}
 	void Update(){
-		if (Input.GetKeyDown (KeyCode.Space)) {
-			SetupGame ();
-		}
+//		if (Input.GetKeyDown (KeyCode.Space)) {
+//			SetupGame ();
+//		}
 	}
 }

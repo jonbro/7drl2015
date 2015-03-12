@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
-
+using UnityEditor;
 public class RLCharacter : DisplayElement
 {
 	Dictionary<string, bool> states = new Dictionary<string, bool>();
@@ -91,7 +91,7 @@ public class RLCharacter : DisplayElement
 		set{
 			_position = value;
 			LeanTween.cancel (gameObject);
-			Compression.PopBlur (transform, 0.9f, 0.25f);
+			Compression.PopBlur (transform, 0.9f, 0.25f, 0);
 			LeanTween.move (gameObject, Grid.GridToWorld (_position.x, _position.y), 0.125f);
 		}
 	}
@@ -179,6 +179,7 @@ public class RLCharacter : DisplayElement
 			}
 			position = lastPosition;
 			SetState ("fastMove", false);
+
 			Compression.PopBlur (transform, 1f, 2.5f);
 			return true;
 		}

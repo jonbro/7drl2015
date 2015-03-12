@@ -46,6 +46,11 @@ public class GameUI : MonoBehaviour
 				level.HideHighlights ();
 			}
 		}
+		// display the console with the current state of the game
+		if (level.monsters.Count == 0) {
+			VectorGui.SetPosition (new Vector2(-.35f, -8.65f));
+			VectorGui.Label ("Press Space to go to next level", 0.1f, Color.white);
+		}
 	}
 	public void AddToPanelAndTransform(DisplayElement de){
 		panel.Add(de);

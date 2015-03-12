@@ -35,8 +35,8 @@ public class Level : MonoBehaviour {
 	Panel gamePanel, highlightPanel;
 	public RLCharacter currentPlayer;
 	public int currentLevel = 0;
-	public int sx = 10;
-	public int sy = 10;
+	public int sx = 8;
+	public int sy = 8;
 	public void Build(Panel _gamePanel){
 		gamePanel = _gamePanel;
 		highlightPanel = Panel.Create();
@@ -75,10 +75,10 @@ public class Level : MonoBehaviour {
 			player.color = GameColors.GetColor ("player");
 			player.gameObject.name = "player"+i;
 		}
-		highlights = new RL.CharacterMap<RLHighlight>(10, 10);
+		highlights = new RL.CharacterMap<RLHighlight>(sx, sy);
 		// setup the highlights
-		for (int x = 0; x < 10; x++) {
-			for (int y = 0; y < 10; y++) {
+		for (int x = 0; x < sx; x++) {
+			for (int y = 0; y < sy; y++) {
 				RLHighlight highlight = RLHighlight.CreateFromSvg (x,y, "highlight");
 				highlight.color = Color.clear;
 				highlightPanel.Add (highlight);
@@ -109,10 +109,10 @@ public class Level : MonoBehaviour {
 				de.Destroy ();
 			}
 		}
-		map = new RL.Map (10, 10);
-		monsterMap = new RL.CharacterMap<RLCharacter> (10, 10);
-		playerMap = new RL.CharacterMap<RLCharacter> (10, 10);
-		itemMap = new RL.CharacterMap<RLItem> (10, 10);
+		map = new RL.Map (sx, sy);
+		monsterMap = new RL.CharacterMap<RLCharacter> (sx, sy);
+		playerMap = new RL.CharacterMap<RLCharacter> (sx, sy);
+		itemMap = new RL.CharacterMap<RLItem> (sx, sy);
 		items = new List<RLItem> ();
 		monsterMap.Clear ();
 		playerMap.Clear ();
@@ -121,11 +121,10 @@ public class Level : MonoBehaviour {
 		monsters = new List<RLCharacter> ();
 		players = new List<RLCharacter> ();
 		// add entrance / exit
-		map [0, Random.Range (1, 9)] = RL.Objects.ENTRANCE;
-		map [9, Random.Range (1, 9)] = RL.Objects.EXIT;
+		map [0, Random.Range (1, sy-1)] = RL.Objects.ENTRANCE;
 		//		// put in some random walls
-		for (int i = 0; i < 10; i++) {
-			map [Random.Range (1, 9), Random.Range (1, 9)] = RL.Objects.WALL;
+		for (int i = 0; i < 4; i++) {
+			map [Random.Range (1, sx-1), Random.Range (1, sy-1)] = RL.Objects.WALL;
 		}
 
 		// add in a few player characters
@@ -165,17 +164,16 @@ public class Level : MonoBehaviour {
 			items.Add (item);
 			UpdateMaps ();
 		}
-		// check to make sure we can walk from the beginning to the end of the level
+		// check to make sure every monster is accessible by every player
 		foreach (RLCharacter p in players) {
 			Vector2i exit = GetPositionOfElement (RL.Objects.EXIT);
-			List<Vector2i> path = pf.FindPath (p.position, exit, OneCostFunction, map); 
-			if (HasPath (path, p.position, exit)) {
-				return true;
-			} else {
-				return false;
+			foreach (RLCharacter m in monsters) {
+				List<Vector2i> path = pf.FindPath (p.position, m.position, OneCostFunction, map); 
+				if (!HasPath (path, p.position, m.position))
+					return false;
 			}
 		}
-		return false;
+		return true;
 	}
 
 	Vector2i FindOpenPosition(){
@@ -263,7 +261,9 @@ public class Level : MonoBehaviour {
 		if (Input.GetKeyDown (KeyCode.Alpha2)) {
 			nextInput = PlayerInput.POWER2;
 		}
-
+		if (Input.GetKeyDown (KeyCode.Space) && monsters.Count == 0) {
+			MoveToNextLevel ();
+		}
 		// convert input into delta positions for easier map movement
 		Vector2i deltaD = new Vector2i (0, 0);
 		if (nextInput == PlayerInput.DOWN) {
@@ -311,6 +311,13 @@ public class Level : MonoBehaviour {
 				CompletePlayerActions ();
 			}
 		}
+	}
+	void MoveToNextLevel(){
+		foreach(RLCharacter p in players){
+			exitPlayers.Add (p);
+		}
+		players.Clear ();
+		fsm.PerformTransition (FsmTransitionId.LevelComplete);
 	}
 	void CompletePlayerActions(){
 		UpdatePlayerMap ();
@@ -463,7 +470,8 @@ public class Level : MonoBehaviour {
 	}
 	public IEnumerator MonsterUpdateCoro(){
 		CheckOverwatch ();
-		foreach (RLCharacter m in monsters) {
+		for (int i = monsters.Count - 1; i >= 0; i--) {
+			RLCharacter m = monsters [i];
 			while (m.actionPoints > 0) {
 				// path towards the player or attack. Should probably add overwatch support at some point for asshole monsters
 				if (MonsterAttack (m) || MonsterMove (m)) {
@@ -499,8 +507,8 @@ public class Level : MonoBehaviour {
 		toCall ();
 	}
 	public Vector2i GetPositionOfElement(RL.Objects element){
-		for (int x = 0; x < 10; x++) {
-			for (int y = 0; y < 10; y++) {
+		for (int x = 0; x < sx; x++) {
+			for (int y = 0; y < sy; y++) {
 				if (map [x, y] == element) {
 					return new Vector2i (x, y);
 				}
@@ -509,8 +517,8 @@ public class Level : MonoBehaviour {
 		return new Vector2i(-1000, -1000);
 	}
 	public void UpdateMapDisplay(){
-		for (int x = 0; x < 10; x++) {
-			for (int y = 0; y < 10; y++) {
+		for (int x = 0; x < sx; x++) {
+			for (int y = 0; y < sy; y++) {
 				GridSVG svg;
 				switch (map [x, y]) {
 				case RL.Objects.WALL:
@@ -530,8 +538,8 @@ public class Level : MonoBehaviour {
 		}
 	}
 	public void HideHighlights(){
-		for (int x = 0; x < 10; x++) {
-			for (int y = 0; y < 10; y++) {
+		for (int x = 0; x < sx; x++) {
+			for (int y = 0; y < sy; y++) {
 				highlights [x, y].color = Color.clear;
 			}
 		}
