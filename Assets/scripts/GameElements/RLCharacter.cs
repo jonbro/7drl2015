@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
-using UnityEditor;
 public class RLCharacter : DisplayElement
 {
 	Dictionary<string, bool> states = new Dictionary<string, bool>();
@@ -163,9 +162,7 @@ public class RLCharacter : DisplayElement
 		}
 	}
 	public bool CustomMovement(Vector2i delta, RL.Map map, RL.CharacterMap<RLCharacter> monsterMap, RL.CharacterMap<RLCharacter> playerMap){
-		Debug.Log ("checking custom movement");
 		if (GetState ("fastMove")) {
-			Debug.Log ("checking fast move");
 			// attempt to move to the end of the line
 			Vector2i lastPosition = position;
 			Vector2i np = position+delta;
@@ -179,7 +176,7 @@ public class RLCharacter : DisplayElement
 			}
 			position = lastPosition;
 			SetState ("fastMove", false);
-
+			canUsePowerup = true;
 			Compression.PopBlur (transform, 1f, 2.5f);
 			return true;
 		}

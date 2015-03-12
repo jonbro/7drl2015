@@ -31,6 +31,7 @@ public class GameUI : MonoBehaviour
 			vPosition -= 2;
 		}
 		// determine if there is a character underneath the cursor, and display the range highlights if so
+		string itemDescription = "";
 		Vector2i mp = Grid.WorldToGrid (Camera.main.ScreenToWorldPoint (new Vector3(Input.mousePosition.x, Input.mousePosition.y)));
 		if (
 			(!lastPosition.Equals(mp))
@@ -47,8 +48,16 @@ public class GameUI : MonoBehaviour
 			}
 		}
 		// display the console with the current state of the game
+		// display instructions
+		VectorGui.SetPosition (new Vector2(-6.35f, 0.35f));
+		VectorGui.Label ("ARROW: Move-Atk", 0.1f, Color.white);
+		VectorGui.Label ("TAB: Next Unit", 0.1f, Color.white);
+
 		VectorGui.SetPosition (new Vector2(-.35f, -7.65f));
 		VectorGui.Label ("Score: "+level.score, 0.1f, Color.white);
+		if (itemDescription != "") {
+			VectorGui.Label (itemDescription, 0.1f, Color.white);
+		}
 		if (level.monsters.Count == 0) {
 			VectorGui.Label ("-1 Score Per Player Turn", 0.1f, Color.white);
 			VectorGui.Label ("Press Space to go to next level", 0.1f, Color.white);

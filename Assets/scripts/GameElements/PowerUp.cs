@@ -16,7 +16,7 @@ public class PowerUp {
 		return "";
 	}
 	public static PowerUp GetPowerup(){
-		switch (Random.Range (0, 4)) {
+		switch (Random.Range (0, 6)) {
 		case 0:
 			return new PUDelayedHeal ();
 		case 1:
@@ -25,6 +25,8 @@ public class PowerUp {
 			return new PUFastMove ();
 		case 3:
 			return new PUScoreUp ();
+		case 4:
+			return new PUAPRefresh ();
 		default:
 			return new PUOverwatch ();
 		}
@@ -71,13 +73,13 @@ public class PUHealthUp : PowerUp {
 }
 public class PUScoreUp : PowerUp {
 	override public string DisplayText(){ return "SCORE UP"; }
-	public string descriptionText = "ADD 5 TO SCORE";
+	public string descriptionText = "ADD 3 TO SCORE";
 	override public string SvgIcon(){
 		return "scoreToken";
 	}
 	override public bool OnPickup (RLCharacter c, Level level){
 		// adds 5 to score
-		level.score += 5;
+		level.score += 4;
 		return false;
 	}
 }
@@ -124,5 +126,26 @@ public class PUDelayedHeal : PowerUp {
 			c.powerups.Remove (this);
 		}
 		return true;
+	}
+}
+public class PUAPRefresh : PowerUp {
+	int charges = 3;
+	override public string DisplayText(){ return "REFRESH AP ("+charges+")"; }
+	public string descriptionText = "SET AP MAX";
+
+	override public string SvgIcon(){
+		return "apRefresh";
+	}
+	override public bool OnPickup (RLCharacter c, Level level){
+		return true;
+	}
+	override public bool OnUse (RLCharacter c, Level level){
+		// check to see if there are any neighbors, and heal them if so
+		c.actionPoints = 3;
+		charges--;
+		if (charges <= 0) {
+			c.powerups.Remove (this);
+		}
+		return false;
 	}
 }

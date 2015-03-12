@@ -10,6 +10,7 @@ public enum PlayerInput
 	RIGHT,
 	POWER1,
 	POWER2,
+	NEXT_CHARACTER,
 	NONE
 }
 
@@ -157,16 +158,12 @@ public class Level : MonoBehaviour {
 			UpdateMaps ();
 		}
 		// add items to the map
-		for (int i = 0; i < 2; i++) {
-			Vector2i monsterPosition = FindOpenPosition ();
-			PowerUp pu = PowerUp.GetPowerup ();
-			RLItem item = (RLItem)RLItem.CreateFromSvg (monsterPosition.x, monsterPosition.y, pu.SvgIcon());
-			item.powerUp = pu;
-			item.color = GameColors.GetColor ("powerup");
-			gamePanel.Add (item);
-			items.Add (item);
-			UpdateMaps ();
+		for (int i = 0; i < 3; i++) {
+			AddItem (PowerUp.GetPowerup ());
 		}
+		// guarantee at least one score token
+		AddItem (new PUScoreUp ());
+
 		// check to make sure every monster is accessible by every player
 		foreach (RLCharacter p in players) {
 			Vector2i exit = GetPositionOfElement (RL.Objects.EXIT);
@@ -178,7 +175,15 @@ public class Level : MonoBehaviour {
 		}
 		return true;
 	}
-
+	void AddItem(PowerUp itemToAdd){
+		Vector2i itemPosition = FindOpenPosition ();
+		RLItem item = RLItem.CreateFromSvg (itemPosition.x, itemPosition.y, itemToAdd.SvgIcon());
+		item.powerUp = itemToAdd;
+		item.color = GameColors.GetColor ("powerup");
+		gamePanel.Add (item);
+		items.Add (item);
+		UpdateMaps ();
+	}
 	Vector2i FindOpenPosition(){
 		Vector2i position = new Vector2i (0, 0);
 		while (
@@ -215,6 +220,12 @@ public class Level : MonoBehaviour {
 	}
 	bool HasPath(List<Vector2i> path, Vector2i startPoint, Vector2i endPoint){
 		return path.Count > 0 && path [path.Count - 1].Equals (endPoint) && path[0].Equals(startPoint);
+	}
+	public void PlayerSetupNewLevel(){
+		foreach (RLCharacter p in players) {
+			p.healthPoints = Mathf.Min(p.healthPoints+1, 3);
+		}
+		PlayerSetup ();
 	}
 	public void PlayerSetup(){
 		foreach (RLCharacter p in players) {
@@ -263,6 +274,10 @@ public class Level : MonoBehaviour {
 		}
 		if (Input.GetKeyDown (KeyCode.Alpha2)) {
 			nextInput = PlayerInput.POWER2;
+		}
+		if (Input.GetKeyDown (KeyCode.Tab)) {
+			nextInput = PlayerInput.NEXT_CHARACTER;
+			SelectNextPlayer ();
 		}
 		if (Input.GetKeyDown (KeyCode.Space) && monsters.Count == 0) {
 			MoveToNextLevel ();
@@ -316,11 +331,27 @@ public class Level : MonoBehaviour {
 		}
 	}
 	void MoveToNextLevel(){
+		PlayerSetupNewLevel ();
 		foreach(RLCharacter p in players){
 			exitPlayers.Add (p);
 		}
 		players.Clear ();
 		fsm.PerformTransition (FsmTransitionId.LevelComplete);
+	}
+	bool SelectNextPlayer(){
+		int apRemain = 0;
+		foreach (RLCharacter p in players) {
+			apRemain += p.actionPoints;
+		}
+		if (apRemain > 0) {
+			currentPlayerCounter = (currentPlayerCounter + 1) % players.Count;
+			SetCurrentPlayer ();
+			while (currentPlayer.actionPoints <= 0) {
+				SelectNextPlayer ();
+			}
+			return true;
+		}
+		return false;
 	}
 	void CompletePlayerActions(){
 		UpdatePlayerMap ();
@@ -329,11 +360,8 @@ public class Level : MonoBehaviour {
 			if (monsters.Count <= 0) {
 				score--;
 			}
-			currentPlayerCounter = currentPlayerCounter + 1;
-			if (currentPlayerCounter > players.Count - 1) {
+			if (!SelectNextPlayer ()) {
 				fsm.PerformTransition (FsmTransitionId.Complete);
-			} else {
-				SetCurrentPlayer ();
 			}
 		}
 	}
@@ -480,7 +508,11 @@ public class Level : MonoBehaviour {
 			RLCharacter m = monsters [i];
 			while (m.actionPoints > 0) {
 				// path towards the player or attack. Should probably add overwatch support at some point for asshole monsters
-				if (MonsterAttack (m) || MonsterMove (m)) {
+				if (MonsterAttack (m)) {
+					m.actionPoints = 0;
+					yield return new WaitForSeconds (0.1f);
+					continue;
+				}else if(MonsterMove (m)){
 					CheckOverwatch ();
 					if(m != null)
 						m.actionPoints--;

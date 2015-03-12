@@ -5,6 +5,7 @@ public class GameRunner : MonoBehaviour {
 	Panel currentPanel;
 	public bool jumpToGame = true;
 	public GameObject grid;
+	bool runningGame = false;
 	// Use this for initialization
 	void Awake () {
 		SetupGrid ();
@@ -30,6 +31,7 @@ public class GameRunner : MonoBehaviour {
 		currentPanel.Add(GridText.Create (0, 0, "SALVAGE CREW"));
 		currentPanel.Add(GridText.Create (0, 1, "TOP SCORE " + PlayerPrefs.GetInt("topScore")));
 		currentPanel.Add(GridText.Create (0, 3, "Run Op"));
+		runningGame = false;
 	}
 	void SetupGame(){
 		if (currentPanel != null) {
@@ -44,13 +46,14 @@ public class GameRunner : MonoBehaviour {
 		gameGO.name = "game";
 		gameGO.GetComponent<Level> ().Build (currentPanel);
 		gameGO.GetComponent<Level> ().OnGameOver = OnGameOver;
+		runningGame = true;
 	}
 	void OnGameOver(){
 		SetupTitle ();
 	}
 	void Update(){
-//		if (Input.GetKeyDown (KeyCode.Space)) {
-//			SetupGame ();
-//		}
+		if (!runningGame && Input.GetKeyDown (KeyCode.Space)) {
+			SetupGame ();
+		}
 	}
 }
