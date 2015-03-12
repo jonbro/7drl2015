@@ -33,7 +33,7 @@ fixed4 frag (v2f_img i) : COLOR
 	float2 uv = i.uv;
 	float4 c = tex2D(_MainTex,uv);
 	#if UNITY_UV_STARTS_AT_TOP
-		uv.y = 1-uv.y;
+		uv.y = 1.0-uv.y;
 	#endif
 	float4 f = tex2D(_Flow,uv+_scroll.xy);
 	float4 stop = tex2D(_Stop,uv);
