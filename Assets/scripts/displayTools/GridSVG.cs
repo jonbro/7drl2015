@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class GridSVG : DisplayElement {
-	public Color color{
+	virtual public Color color{
 		set{
 			GetComponent<SvgRenderer> ().colorProperty = value;
 		}

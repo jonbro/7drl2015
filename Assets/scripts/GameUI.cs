@@ -11,6 +11,7 @@ public class GameUI : MonoBehaviour
 		panel = Panel.Create();
 		level = _level;
 	}
+	Vector2i lastPosition;
 	public void Update(){
 		float vPosition = 0.35f;
 		foreach (RLCharacter c in level.players) {
@@ -32,9 +33,11 @@ public class GameUI : MonoBehaviour
 		// determine if there is a character underneath the cursor, and display the range highlights if so
 		Vector2i mp = Grid.WorldToGrid (Camera.main.ScreenToWorldPoint (new Vector3(Input.mousePosition.x, Input.mousePosition.y)));
 		if (
-			mp.x >= 0 && mp.x < level.sx
+			(!lastPosition.Equals(mp))
+			&& mp.x >= 0 && mp.x < level.sx
 			&& mp.y >= 0 && mp.y < level.sy
 		){
+			lastPosition = mp;
 			if (level.playerMap [mp.x, mp.y] != null) {
 				level.playerMap [mp.x, mp.y].DisplayFireRadius (level.map, level.monsterMap, level.highlights);
 			} else if(level.monsterMap [mp.x, mp.y] != null) {

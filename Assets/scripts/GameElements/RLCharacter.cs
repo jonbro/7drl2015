@@ -124,7 +124,7 @@ public class RLCharacter : DisplayElement
 		for (int i = 0; i < 4; i++) {
 			Vector2i delta = new Vector2i (RL.Map.nDir [i, 0], RL.Map.nDir [i, 1]);
 			Vector2i currentCell = position + delta;
-			int count = 1;
+			int count = 0;
 			while (map.IsValidTile (currentCell.x, currentCell.y) && map [currentCell.x, currentCell.y] == RL.Objects.OPEN && count < fireRange) {
 				count++;
 				RLCharacter enemy = enemyMap [currentCell.x, currentCell.y];

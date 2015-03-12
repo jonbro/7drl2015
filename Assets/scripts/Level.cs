@@ -340,14 +340,14 @@ public class Level : MonoBehaviour {
 	public bool Attack(Vector2i delta, RLCharacter firingCharacter, RL.CharacterMap<RLCharacter> cMap, RL.CharacterMap<RLCharacter> blockerMap){
 		// check to see if one of the neighboring cells has a character in it, and attack if so
 		Vector2i currentCell = firingCharacter.position + delta;
-		int count = 1;
+		int count = 0;
 		while (
 			map.IsValidTile(currentCell.x, currentCell.y) 
 			&& map [currentCell.x, currentCell.y] == RL.Objects.OPEN
 			&& blockerMap[currentCell.x, currentCell.y] == null
 			&& count < firingCharacter.fireRange
 		){
-
+			count++;
 			RLCharacter enemy = cMap [currentCell.x, currentCell.y];
 			if (enemy != null) {
 				LeanTween.move (enemy.gameObject, new Vector3[] {
