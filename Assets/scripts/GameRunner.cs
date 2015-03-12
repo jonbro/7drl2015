@@ -21,7 +21,7 @@ public class GameRunner : MonoBehaviour {
 		GameObject gridHolder = new GameObject ("grid");
 		Grid.SetCameraSize (gridX, gridY, 2, 2);
 		//TODO make this the correct size
-		grid.transform.localScale = new Vector3(gridX,gridY,1);
+		grid.transform.localScale = new Vector3(gridX*2,gridY*2,1);
 	
 	}
 	void SetupTitle(){

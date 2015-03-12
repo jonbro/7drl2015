@@ -16,11 +16,11 @@ public class PowerUp {
 		return "";
 	}
 	public static PowerUp GetPowerup(){
-		switch (Random.Range (0, 3)) {
-		case 0:
-			return new PUEndTurn ();
+		switch (Random.Range (1, 4)) {
 		case 1:
 			return new PUHealthUp ();
+		case 2:
+			return new PUFastMove ();
 		default:
 			return new PUOverwatch ();
 		}
@@ -37,7 +37,8 @@ public class PUOverwatch : PowerUp {
 		return true;
 	}
 	override public bool OnUse(RLCharacter c){
-		c.overwatch = true;
+		c.canUsePowerup = false;
+		c.SetState("overwatch",true);
 		return true;
 	}
 }
@@ -61,6 +62,22 @@ public class PUHealthUp : PowerUp {
 	override public bool OnPickup(RLCharacter c){
 		// should destroy self and immediately add 2 to the players health
 		c.healthPoints = Mathf.Max(c.healthPoints+2, 3);
+		return false;
+	}
+}
+public class PUFastMove : PowerUp {
+	override public string DisplayText(){ return "MOVE FAST"; }
+	public string descriptionText = "MOVE REALLY FAST IN DIRECTION";
+	override public string SvgIcon(){
+		return "fastMove";
+	}
+	override public bool OnPickup(RLCharacter c){
+		return true;
+	}
+	override public bool OnUse(RLCharacter c){
+		// set fast move on the character, and allow them to take another turn
+		c.canUsePowerup = false;
+		c.SetState("fastMove",true);
 		return false;
 	}
 }

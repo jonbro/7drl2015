@@ -17,7 +17,7 @@ public class LineRenderer : MonoBehaviour
 	protected Color32[] cs;
 	protected float LineThickness = 0.01f;
 	public float pixelThickness;
-	int maxLines = 1000;
+	protected int maxLines = 1000;
 	public Color color;
 	bool meshCreated = false;
 	protected float pixelSize;

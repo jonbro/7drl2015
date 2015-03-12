@@ -5,9 +5,11 @@ using System;
 
 public class RLCharacter : DisplayElement
 {
+	Dictionary<string, bool> states = new Dictionary<string, bool>();
 	public List<PowerUp> powerups = new List<PowerUp>();
 	SpriteRenderer actionPointDisplay, overwatchDisplay;
-	SvgRenderer healthPointDisplay;
+	SvgRenderer healthPointDisplay, stateDisplay;
+	public bool canUsePowerup;
 	public int x {
 		get{ return position.x; }
 	}
@@ -65,7 +67,6 @@ public class RLCharacter : DisplayElement
 				overwatchDisplay.sprite = null;
 		}
 	}
-
 	int _healthPoints = 3;
 	public int healthPoints{
 		get { return _healthPoints; }
@@ -91,6 +92,32 @@ public class RLCharacter : DisplayElement
 			_position = value;
 			transform.position = Grid.GridToWorld (_position.x, _position.y);
 		}
+	}
+	string currentDisplayState = "";
+	public void SetState(string stateName, bool value){
+		if (value) {
+			if (stateDisplay == null) {
+				stateDisplay = GridSVG.CreateFromSvg (x, y, stateName + "State").GetComponent<SvgRenderer> ();
+				GameObject stateDisplayGO = stateDisplay.gameObject;
+				stateDisplayGO.transform.SetParent (transform, false);
+				stateDisplayGO.transform.localPosition = Vector3.zero;
+			}
+			currentDisplayState = stateName;
+			stateDisplay.LoadSvgFromResources (stateName + "State");
+			stateDisplay.colorProperty = originalColor;
+		} else {
+			if (currentDisplayState == stateName) {
+				currentDisplayState = "";
+				stateDisplay.colorProperty = Color.clear;
+			}
+		}
+		states [stateName] = value;
+	}
+	public bool GetState(string stateName){
+		if (!states.ContainsKey (stateName))
+			return false;
+		else
+			return states [stateName];
 	}
 	Color originalColor;
 	SpriteRenderer spriteR;
@@ -132,6 +159,27 @@ public class RLCharacter : DisplayElement
 				currentCell += delta;
 			}
 		}
+	}
+	public bool CustomMovement(Vector2i delta, RL.Map map, RL.CharacterMap<RLCharacter> monsterMap, RL.CharacterMap<RLCharacter> playerMap){
+		Debug.Log ("checking custom movement");
+		if (GetState ("fastMove")) {
+			Debug.Log ("checking fast move");
+			// attempt to move to the end of the line
+			Vector2i lastPosition = position;
+			Vector2i np = position+delta;
+			while (
+				map.IsOpenTile (np.x, np.y)
+				&& (playerMap[np.x, np.y] == null ||playerMap[np.x, np.y] == this)
+				&& monsterMap[np.x, np.y] == null
+			) {
+				lastPosition = np;
+				np += delta;
+			}
+			position = lastPosition;
+			SetState ("fastMove", false);
+			return true;
+		}
+		return false;
 	}
 }
 

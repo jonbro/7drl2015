@@ -218,7 +218,8 @@ public class Level : MonoBehaviour {
 	public void PlayerSetup(){
 		foreach (RLCharacter p in players) {
 			p.actionPoints = 2;
-			p.overwatch = false;
+			p.SetState("overwatch", false);
+			p.canUsePowerup = true;
 		}
 		currentPlayerCounter = 0;
 		SetCurrentPlayer ();
@@ -277,7 +278,7 @@ public class Level : MonoBehaviour {
 		if (nextInput == PlayerInput.LEFT) {
 			deltaD = new Vector2i (-1, 0);
 		}
-		if (nextInput == PlayerInput.POWER1 || nextInput == PlayerInput.POWER2) {
+		if (currentPlayer.canUsePowerup && nextInput == PlayerInput.POWER1 || nextInput == PlayerInput.POWER2) {
 			int powerSlot = (nextInput == PlayerInput.POWER1) ? 0 : 1;
 			// check to see if the player has a power in the current slot, and use it if so
 			if (currentPlayer.powerups [powerSlot] != null && currentPlayer.powerups [powerSlot].OnUse (currentPlayer)) {
@@ -287,7 +288,11 @@ public class Level : MonoBehaviour {
 		}
 		if (!deltaD.Equals (new Vector2i (0, 0))) {
 			UpdateMonsterMap ();
-			if (Attack(deltaD, currentPlayer, monsterMap, playerMap) || PlayerMovement (deltaD)) {
+			if (
+				currentPlayer.CustomMovement(deltaD, map, monsterMap, playerMap)
+				|| Attack(deltaD, currentPlayer, monsterMap, playerMap)
+				|| PlayerMovement (deltaD)
+			) {
 				// check to see if the player is on a powerup, and apply it if they are
 				if (itemMap [currentPlayer.x, currentPlayer.y] != null) {
 					RLItem item = itemMap [currentPlayer.x, currentPlayer.y];
@@ -440,12 +445,12 @@ public class Level : MonoBehaviour {
 	public void CheckOverwatch(){
 		UpdateMonsterMap ();
 		foreach (RLCharacter p in players) {
-			if (p.overwatch) {
+			if (p.GetState("overwatch")) {
 				for (int i = 0; i < 4; i++) {
 					Vector2i AttackDirection = new Vector2i (RL.Map.nDir [i, 0], RL.Map.nDir [i, 1]);
 					if (Attack (AttackDirection, p, monsterMap, playerMap)) {
 						// if the attack happens on the first turn, should remove action points
-						p.overwatch = false;
+						p.SetState("overwatch", false);
 						break;
 					}
 				}
