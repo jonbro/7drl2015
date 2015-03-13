@@ -2,18 +2,62 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+
+public class RLCharacterInfo {
+	public int maxHealth = 3;
+	public int maxActionPoints = 2;
+	public string svgName = "circ0_0";
+	public int fireRadius = 3;
+	public bool endTurnOnAttack = false;
+	public string description = "Player";
+	public Color coreColor;
+	public RLCharacterInfo(){
+		coreColor = GameColors.GetColor ("player");
+	}
+	public static RLCharacterInfo baseMonster = new RLCharacterInfo {
+		description = "SMPL: RANGE 3 : END ON ATK",
+		svgName = "enemy",
+		coreColor = GameColors.GetColor("enemy")
+	};
+	public static RLCharacterInfo monsterMultifire = new RLCharacterInfo {
+		description = "ASLT: RANGE 2 : MULTIFIRE",
+		svgName = "enemy_range2",
+		fireRadius = 2,
+		coreColor = GameColors.GetColor("enemy")
+	};
+	public static RLCharacterInfo GetRandomMonster(){
+		switch (UnityEngine.Random.Range (0, 2)) {
+		case 0:
+			return baseMonster;
+		default:
+			return monsterMultifire;
+		}
+	}
+}
+public class RLPlayerCharacterData{
+	public List<PowerUp> powerups = new List<PowerUp>();
+}
 public class RLCharacter : DisplayElement
 {
+	public RLPlayerCharacterData characterData;
 	Dictionary<string, bool> states = new Dictionary<string, bool>();
-	public List<PowerUp> powerups = new List<PowerUp>();
 	SpriteRenderer actionPointDisplay, overwatchDisplay;
 	SvgRenderer healthPointDisplay, stateDisplay;
 	public bool canUsePowerup;
+	public RLCharacterInfo info;
 	public int x {
 		get{ return position.x; }
 	}
 	public int y {
 		get { return position.y; }
+	}
+	public List<PowerUp> powerups{
+		get{ 
+			return characterData.powerups;
+		}
+		set{
+			characterData.powerups = value;
+		}
 	}
 	// overlay gfx, could potentially abstract?
 	int _maxActionPoints = 2;
@@ -85,7 +129,6 @@ public class RLCharacter : DisplayElement
 		set {
 			// attach the action point display if required,
 			if (value < _healthPoints) {
-				Debug.Log ("showing attack?");
 				Compression.PopBlur (transform, 0.9f, 1.25f, .8f);
 			}
 			_healthPoints = Mathf.Min(3, value);
@@ -139,13 +182,16 @@ public class RLCharacter : DisplayElement
 	}
 	Color originalColor;
 	SpriteRenderer spriteR;
-	public static RLCharacter Create(int x, int y, string ResourceName){
-		GameObject characterGO = (GameObject)Instantiate (Resources.Load (ResourceName) as GameObject, Grid.GridToWorld (x, y), Quaternion.identity);
+	public static RLCharacter Create(int x, int y, string ResourceName, RLCharacterInfo _info){
+		GameObject characterGO = (GameObject)Instantiate (Resources.Load ("Player") as GameObject, Grid.GridToWorld (x, y), Quaternion.identity);
 		RLCharacter character = characterGO.GetComponent<RLCharacter> ();
-		character.originalColor = character.GetComponent<SvgRenderer>().colorProperty;
+		characterGO.GetComponent<SvgRenderer> ().LoadSvgFromResources (_info.svgName);
+		character.info = _info;
+		character.GetComponent<SvgRenderer>().colorProperty = character.originalColor = _info.coreColor;
 		character.position = new Vector2i (x, y);
-		character.actionPoints = 2;
-		character.healthPoints = 3;
+		character.actionPoints = _info.maxActionPoints;
+		character._maxActionPoints = _info.maxActionPoints;
+		character.healthPoints = _info.maxHealth;
 		character.spriteR = character.GetComponent<SpriteRenderer> ();
 		return character;
 	}
@@ -170,7 +216,7 @@ public class RLCharacter : DisplayElement
 			Vector2i delta = new Vector2i (RL.Map.nDir [i, 0], RL.Map.nDir [i, 1]);
 			Vector2i currentCell = position + delta;
 			int count = 0;
-			while (map.IsValidTile (currentCell.x, currentCell.y) && map [currentCell.x, currentCell.y] == RL.Objects.OPEN && count < fireRange) {
+			while (map.IsValidTile (currentCell.x, currentCell.y) && map [currentCell.x, currentCell.y] == RL.Objects.OPEN && count < info.fireRadius) {
 				count++;
 				RLCharacter enemy = enemyMap [currentCell.x, currentCell.y];
 				highlights [currentCell.x, currentCell.y].color = Color.red;

@@ -32,15 +32,17 @@ public class Level : MonoBehaviour {
 	FsmSystem fsm;
 	GameUI ui;
 	RL.Pathfinder pf = new RL.Pathfinder ();
-	public System.Action OnGameOver;
+	public System.Action OnGameOver, OnContractComplete;
 	Panel gamePanel, highlightPanel;
 	public RLCharacter currentPlayer;
 	public int currentLevel = 0;
 	public int sx = 8;
 	public int sy = 8;
 	public int score = 5;
-
-	public void Build(Panel _gamePanel){
+	public ContractInfo contract;
+	GameInfo gameInfo;
+	public void Build(Panel _gamePanel, GameInfo _gameInfo){
+		gameInfo = _gameInfo;
 		gamePanel = _gamePanel;
 		highlightPanel = Panel.Create();
 		ui = ((GameObject)Instantiate((Resources.Load ("UI") as GameObject))).GetComponent<GameUI>();
@@ -71,9 +73,9 @@ public class Level : MonoBehaviour {
 		fsm.Start ();
 	}
 	public void InitialGen(){
-		for (int i = 0; i < 3; i++) {
-			RLCharacter player = RLCharacter.Create (0, 0, "Player");
-			player.powerups.Add (new PUEndTurn ());
+		for (int i = 0; i < gameInfo.crew.Count; i++) {
+			RLCharacter player = RLCharacter.Create (0, 0, "Player", new RLCharacterInfo());
+			player.characterData = gameInfo.crew [i];
 			exitPlayers.Add (player);
 			player.color = GameColors.GetColor ("player");
 			player.gameObject.name = "player"+i;
@@ -151,7 +153,7 @@ public class Level : MonoBehaviour {
 
 		for (int i = 0; i < (currentLevel+1); i++) {
 			Vector2i monsterPosition = FindOpenPosition ();
-			RLCharacter monster = RLCharacter.Create (monsterPosition.x, monsterPosition.y, "Enemy");
+			RLCharacter monster = RLCharacter.Create (monsterPosition.x, monsterPosition.y, "Enemy", RLCharacterInfo.GetRandomMonster());
 			monster.color = GameColors.GetColor ("enemy");
 			gamePanel.Add (monster);
 			monsters.Add (monster);
@@ -331,12 +333,18 @@ public class Level : MonoBehaviour {
 		}
 	}
 	void MoveToNextLevel(){
-		PlayerSetupNewLevel ();
-		foreach(RLCharacter p in players){
-			exitPlayers.Add (p);
+		if (currentLevel == contract.rooms) {
+			OnContractComplete ();
+			Destroy (ui.gameObject);
+			Destroy (gameObject);
+		}else{
+			PlayerSetupNewLevel ();
+			foreach (RLCharacter p in players) {
+				exitPlayers.Add (p);
+			}
+			players.Clear ();
+			fsm.PerformTransition (FsmTransitionId.LevelComplete);
 		}
-		players.Clear ();
-		fsm.PerformTransition (FsmTransitionId.LevelComplete);
 	}
 	bool SelectNextPlayer(){
 		int apRemain = 0;
@@ -391,7 +399,7 @@ public class Level : MonoBehaviour {
 			map.IsValidTile(currentCell.x, currentCell.y) 
 			&& map [currentCell.x, currentCell.y] == RL.Objects.OPEN
 			&& blockerMap[currentCell.x, currentCell.y] == null
-			&& count < firingCharacter.fireRange
+			&& count < firingCharacter.info.fireRadius
 		){
 			count++;
 			RLCharacter enemy = cMap [currentCell.x, currentCell.y];
@@ -560,8 +568,8 @@ public class Level : MonoBehaviour {
 				GridSVG svg;
 				switch (map [x, y]) {
 				case RL.Objects.WALL:
-					svg = (GridSVG)gamePanel.Add (GridSVG.Create (x, y, "wall"));
-					svg.color = GameColors.GetColor ("wall");
+					svg = (GridSVG)gamePanel.Add (GridSVG.CreateFromSvg (x, y, contract.svgName+"wall"));
+					svg.color = contract.contractColor;
 					break;
 				case RL.Objects.ENTRANCE:
 					svg = (GridSVG)gamePanel.Add(GridSVG.Create (x, y, "airlock"));

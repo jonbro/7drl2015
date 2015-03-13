@@ -13,6 +13,9 @@ public class PowerUp {
 	virtual public string DisplayText(){
 		return "";
 	}
+	virtual public int saleValue {
+		get{ return 10; }
+	}
 	public int actionPointModifier;
 	public static PowerUp GetPowerup(){
 		switch (Random.Range (0, 6)) {
@@ -77,23 +80,24 @@ public class PUHealthUp : PowerUp {
 	}
 }
 public class PUScoreUp : PowerUp {
+	public static int scoreValue = 4;
 	override public string DisplayText(){ return "SCORE UP"; }
 	override public string DescriptionText(){
-		return "ADD 4 TO SCORE";
+		return "ADD "+scoreValue+" TO SCORE";
 	}
 	override public string SvgIcon(){
 		return "scoreToken";
 	}
 	override public bool OnPickup (RLCharacter c, Level level){
 		// adds 5 to score
-		level.score += 4;
+		level.score += scoreValue;
 		return false;
 	}
 }
 public class PUFastMove : PowerUp {
 	override public string DisplayText(){ return "MOVE FAST"; }
 	override public string DescriptionText(){
-		return "MOVE REALLY FAST IN DIRECTION";
+		return "MOVE FAST IN DIRECTION";
 	}
 	override public string SvgIcon(){
 		return "fastMove";

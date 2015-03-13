@@ -47,6 +47,7 @@ public class GameUI : MonoBehaviour
 			} 
 			if(level.monsterMap [mp.x, mp.y] != null) {
 				level.monsterMap [mp.x, mp.y].DisplayFireRadius (level.map, level.playerMap, level.highlights);
+				itemDescription.Add (level.monsterMap [mp.x, mp.y].info.description);
 				displayHighlights = true;
 			}
 			if(level.itemMap [mp.x, mp.y] != null) {
@@ -64,7 +65,7 @@ public class GameUI : MonoBehaviour
 		VectorGui.Label ("MOUSE: Get Info", 0.1f, Color.white);
 
 		VectorGui.SetPosition (new Vector2(-.35f, -7.65f));
-		VectorGui.Label (System.String.Format("Score: {0} Level: {1}", level.score, level.currentLevel), 0.1f, Color.white);
+		VectorGui.Label (System.String.Format("Credits: {0} Level: {1} / {2}", level.score, level.currentLevel, level.contract.rooms), 0.1f, Color.white);
 		foreach (String description in itemDescription) {
 			VectorGui.Label (description, 0.1f, Color.white);
 		}

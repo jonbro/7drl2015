@@ -33,7 +33,7 @@ public class Grid : MonoBehaviour {
 	public static Vector3 GridToWorld(Vector2 v){
 		return new Vector3 (v.x, -v.y);
 	}
-	public static Vector3 GridToWorld(int x, int y){
+	public static Vector3 GridToWorld(float x, float y){
 		return GridToWorld (new Vector2 (x, y));
 	}
 	public static Vector2i WorldToGrid(Vector3 v){

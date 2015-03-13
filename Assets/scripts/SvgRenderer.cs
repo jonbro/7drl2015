@@ -11,7 +11,7 @@ public class SvgRenderer : LineRenderer {
 	// Use this for initialization
 	void Start () {
 		// get single pixel width
-		if(!svgLoaded)
+		if(!svgLoaded && SVGFile != null)
 			LoadSvgFromTextAsset (SVGFile);
 	}
 	public void LoadSvgFromResources(string svgName){

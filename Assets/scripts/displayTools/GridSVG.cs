@@ -7,7 +7,7 @@ public class GridSVG : DisplayElement {
 			GetComponent<SvgRenderer> ().colorProperty = value;
 		}
 	}
-	public static GridSVG CreateFromSvg(int x, int y, string resourceName, Grid.Offset _offset = Grid.Offset.CENTER){
+	public static GridSVG CreateFromSvg(float x, float y, string resourceName, Grid.Offset _offset = Grid.Offset.CENTER){
 		GameObject go = (GameObject)(Instantiate(Resources.Load("GridSvg") as GameObject, Grid.GridToWorld(x,y)+Grid.OffsetToVector(_offset), Quaternion.identity));
 		GridSVG gs = go.GetComponent<GridSVG>();
 		gs.GetComponent<SvgRenderer> ().LoadSvgFromResources (resourceName);

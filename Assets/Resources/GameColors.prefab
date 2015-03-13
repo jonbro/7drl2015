@@ -48,6 +48,22 @@ MonoBehaviour:
     color: {r: .129181072, g: .784313738, b: .767889738, a: 1}
   - name: powerup
     color: {r: .635294139, g: .886274517, b: .654901981, a: 1}
+  - name: derelict0
+    color: {r: .503760099, g: .650616348, b: .701960802, a: 1}
+  - name: derelict1
+    color: {r: .253779292, g: .807076633, b: .874509811, a: 1}
+  - name: derelict2
+    color: {r: 0, g: .438866168, b: .635294139, a: 1}
+  - name: derelict3
+    color: {r: .709803939, g: .139177233, b: .53019172, a: 1}
+  - name: planet0
+    color: {r: .847058833, g: .416474074, b: .166089952, a: 1}
+  - name: planet1
+    color: {r: .46297577, g: .874509811, b: .637218654, a: 1}
+  - name: planet2
+    color: {r: .607704699, g: .868391454, b: .870588243, a: 1}
+  - name: planet3
+    color: {r: .893644691, g: .925490201, b: .46818915, a: 1}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
