@@ -43,16 +43,15 @@ public class ContractInfo{
 	};
 	public void Init(){
 		rooms = Random.Range (3, 6);
+		days = Random.Range (2, 5);
 		switch(nameType){
 		case NameType.SHIP:
 			name = NameGen.GetShipName ();
 			contractColor = GameColors.GetColor ("derelict" + Random.Range (0, 4));
-			days = Random.Range (1, 5);
 			break;
 		case NameType.PLANET:
 			name = NameGen.GetPlanetName ();
 			contractColor = GameColors.GetColor ("planet" + Random.Range (0, 4));
-			days = Random.Range (1, 5);
 			break;
 		}
 	}
@@ -110,7 +109,7 @@ public class ContractPicker : MonoBehaviour {
 		string shipName = NameGen.GetShipName ();
 		string introductionText = "crew of the {0}, you made a grave mistake. \nYou thought you could afford those bodies,\nor at least escape from your creditors.\n" +
 			"now you have {1} days to pay back the {2} credits you owe,\nbefore you are repossesed.";
-		introductionText = System.String.Format (introductionText, shipName, gameInfo.daysRemaining, gameInfo.totalCredits-gameInfo.creditsPaid);
+		introductionText = System.String.Format (introductionText, gameInfo.shipName, gameInfo.daysRemaining, gameInfo.totalCredits-gameInfo.creditsEarned);
 		introStrings = introductionText.Split ('\n');
 
 		// add all the contracts that we can take out

@@ -6,7 +6,10 @@ public class PowerUp {
 		return "";
 	}
 	virtual public bool OnPickup (RLCharacter c, Level level){ return false; }
-	virtual public bool OnUse (RLCharacter c, Level level){ return false; }
+	virtual public bool OnUse (RLCharacter c, Level level){ 
+		useCount++;
+		return false; 
+	}
 	virtual public string SvgIcon(){
 		return "";
 	}
@@ -14,8 +17,9 @@ public class PowerUp {
 		return "";
 	}
 	virtual public int saleValue {
-		get{ return 10; }
+		get{ return Mathf.Max(0, 4-useCount); }
 	}
+	public int useCount = 0;
 	public int actionPointModifier;
 	public static PowerUp GetPowerup(){
 		switch (Random.Range (0, 6)) {
@@ -47,6 +51,7 @@ public class PUOverwatch : PowerUp {
 		return true;
 	}
 	override public bool OnUse (RLCharacter c, Level level){
+		base.OnUse (c, level);
 		c.canUsePowerup = false;
 		c.SetState("overwatch",true);
 		return true;
@@ -83,14 +88,14 @@ public class PUScoreUp : PowerUp {
 	public static int scoreValue = 4;
 	override public string DisplayText(){ return "SCORE UP"; }
 	override public string DescriptionText(){
-		return "ADD "+scoreValue+" TO SCORE";
+		return "ADD "+scoreValue+" TO CREDITS";
 	}
 	override public string SvgIcon(){
 		return "scoreToken";
 	}
 	override public bool OnPickup (RLCharacter c, Level level){
 		// adds 5 to score
-		level.score += scoreValue;
+		level.gameInfo.creditsEarned += scoreValue;
 		return false;
 	}
 }
@@ -106,6 +111,7 @@ public class PUFastMove : PowerUp {
 		return true;
 	}
 	override public bool OnUse (RLCharacter c, Level level){
+		base.OnUse (c, level);
 		// set fast move on the character, and allow them to take another turn
 		c.canUsePowerup = false;
 		c.SetState("fastMove",true);
@@ -125,6 +131,7 @@ public class PUDelayedHeal : PowerUp {
 		return true;
 	}
 	override public bool OnUse (RLCharacter c, Level level){
+		base.OnUse (c, level);
 		// check to see if there are any neighbors, and heal them if so
 		level.UpdateMaps ();
 		for (int i = 0; i < 8; i++) {
@@ -158,6 +165,8 @@ public class PUAPRefresh : PowerUp {
 		return true;
 	}
 	override public bool OnUse (RLCharacter c, Level level){
+		// should use this anytime they spend the third action point
+		base.OnUse (c, level);
 		return false;
 	}
 }

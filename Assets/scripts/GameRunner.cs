@@ -8,10 +8,13 @@ public class GameInfo{
 	public int totalDays;
 	public int daysRemaining;
 	public int totalCredits;
-	public int creditsPaid;
+	public int creditsEarned;
+	public string shipName;
 	public GameInfo(){
-		daysRemaining = totalDays = Random.Range (7, 15);
-		totalCredits = Random.Range (70, 130);
+		daysRemaining = totalDays = 12; //Random.Range (7, 15);
+		totalCredits = 85; //Random.Range (70, 130);
+		creditsEarned = 5;
+		shipName = NameGen.GetShipName ();
 	}
 }
 
@@ -24,7 +27,7 @@ public class GameRunner : MonoBehaviour {
 		CONTRACT,
 		TITLE,
 		SHOP,
-		GAMEWIN
+		GAMEOVER
 	}
 	bool runningGame = false;
 	bool titleScreen = true;
@@ -33,11 +36,16 @@ public class GameRunner : MonoBehaviour {
 	// Use this for initialization
 	void Awake () {
 		SetupGrid ();
+//		AudioTriggerSystem.instance ().QueueClip ("exc2");
+//		AudioTriggerSystem.instance ().PlayQueue (true);
 	}
 	void Start(){
 		SetupGameInfo ();
-		AddRandomScrap ();
-		SetupShop ();
+//		AddRandomScrap ();
+		if (jumpToGame)
+			OnGameOver ();
+		else
+			SetupTitle ();
 	}
 	void SetupGrid(){
 		int gridX = 20;
@@ -46,7 +54,6 @@ public class GameRunner : MonoBehaviour {
 		Grid.SetCameraSize (gridX, gridY, 2, 2);
 		//TODO make this the correct size
 		grid.transform.localScale = new Vector3(gridX*2,gridY*2,1);
-		
 	}
 	void SetupGameInfo(){
 		gameInfo = new GameInfo ();
@@ -65,13 +72,14 @@ public class GameRunner : MonoBehaviour {
 		}
 	}
 	void SetupTitle(){
+		ClearCurrentPanel ();
 		SetupGameInfo ();
 		currentPanel = Panel.Create ();
 		// place title at grid position
 		runningGame = false;
 		currentScreen = ScreenName.TITLE;
 	}
-	void SetupContract(){
+	void ClearCurrentPanel(){
 		if (currentPanel != null) {
 			// destroy everything on the current panel and get the game displaying
 			foreach (DisplayElement de in currentPanel.elements) {
@@ -79,21 +87,25 @@ public class GameRunner : MonoBehaviour {
 			}
 			Destroy (currentPanel.gameObject);
 		}
-		currentPanel = Panel.Create ();
-		GameObject contractPicker = new GameObject ("ContractPicker");
-		ContractPicker cp = contractPicker.AddComponent<ContractPicker> ();
-		cp.Init (gameInfo);
-		cp.StartGame = SetupGame;
-		currentScreen = ScreenName.CONTRACT;
+	}
+	void SetupContract(){
+		// check to see if we hit our credit limit
+		// or we ran out of days
+		if (gameInfo.creditsEarned >= gameInfo.totalCredits || gameInfo.daysRemaining <= 0) {
+			OnGameOver ();
+		} else {
+			ClearCurrentPanel ();
+			currentPanel = Panel.Create ();
+			GameObject contractPicker = new GameObject ("ContractPicker");
+			ContractPicker cp = contractPicker.AddComponent<ContractPicker> ();
+			cp.Init (gameInfo);
+			cp.StartGame = SetupGame;
+			currentScreen = ScreenName.CONTRACT;
+		}
 	}
 	void SetupGame(ContractInfo contract){
-		if (currentPanel != null) {
-			// destroy everything on the current panel and get the game displaying
-			foreach (DisplayElement de in currentPanel.elements) {
-				de.Destroy ();
-			}
-			Destroy (currentPanel.gameObject);
-		}
+		ClearCurrentPanel ();
+		gameInfo.daysRemaining -= contract.days;
 		currentPanel = Panel.Create ();
 		GameObject gameGO = (GameObject)Instantiate(Resources.Load ("Game") as GameObject, Vector3.zero, Quaternion.identity);
 		gameGO.name = "game";
@@ -104,16 +116,16 @@ public class GameRunner : MonoBehaviour {
 		currentScreen = ScreenName.GAME;
 	}
 	void OnGameOver(){
-		SetupTitle ();
+		ClearCurrentPanel ();
+		currentPanel = Panel.Create ();
+		GameObject gameOver = new GameObject ("GameOver");
+		GameOverScreen gameoverScreen = gameOver.AddComponent<GameOverScreen> ();
+		gameoverScreen.Init (gameInfo);
+		gameoverScreen.ExitScreen = SetupTitle;
+		currentScreen = ScreenName.GAMEOVER;
 	}
 	void SetupShop(){
-		if (currentPanel != null) {
-			// destroy everything on the current panel and get the game displaying
-			foreach (DisplayElement de in currentPanel.elements) {
-				de.Destroy ();
-			}
-			Destroy (currentPanel.gameObject);
-		}
+		ClearCurrentPanel ();
 		currentPanel = Panel.Create ();
 		GameObject contractPicker = new GameObject ("Shop");
 		Shop shop = contractPicker.AddComponent<Shop> ();
@@ -127,8 +139,9 @@ public class GameRunner : MonoBehaviour {
 			VectorGui.Label ("SALVAGE CREW", 0.6f, Color.white);
 			VectorGui.Label ("", 0.35f, Color.white);
 			VectorGui.Label ("PRESS SPACE TO PAY YOUR DEBTS", 0.2f, Color.white);
-			VectorGui.Label ("TOP CREDITS: "+PlayerPrefs.GetInt("topScore"), 0.1f, Color.white);
-
+			if (PlayerPrefs.HasKey ("topScore")) {
+				VectorGui.Label ("TOP CREDITS: "+PlayerPrefs.GetInt("topScore"), 0.1f, Color.white);
+			}
 			if (Input.GetKeyDown (KeyCode.Space)) {
 				SetupContract ();
 			}

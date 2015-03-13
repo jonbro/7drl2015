@@ -237,7 +237,7 @@ MonoBehaviour:
   stop: {fileID: 0}
   offset: {x: .00100000005, y: .00100000005}
   fade: .280000001
-  phase: 64.6088181
+  phase: 108.664993
   phasePerSecond: .930000007
   scrollPerSecond: {x: .0700000003, y: .0900000036}
   center: {fileID: 2114070967}
@@ -509,7 +509,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c17ff6a63a4364a2d91b6fb3bccb1e88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpToGame: 1
+  jumpToGame: 0
   grid: {fileID: 880538683}
 --- !u!1 &2114070966
 GameObject:

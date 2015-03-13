@@ -10,6 +10,7 @@ public enum PlayerInput
 	RIGHT,
 	POWER1,
 	POWER2,
+	END_TURN,
 	NEXT_CHARACTER,
 	NONE
 }
@@ -40,7 +41,7 @@ public class Level : MonoBehaviour {
 	public int sy = 8;
 	public int score = 5;
 	public ContractInfo contract;
-	GameInfo gameInfo;
+	public GameInfo gameInfo;
 	public void Build(Panel _gamePanel, GameInfo _gameInfo){
 		gameInfo = _gameInfo;
 		gamePanel = _gamePanel;
@@ -277,6 +278,10 @@ public class Level : MonoBehaviour {
 		if (Input.GetKeyDown (KeyCode.Alpha2)) {
 			nextInput = PlayerInput.POWER2;
 		}
+		if (Input.GetKeyDown (KeyCode.E)) {
+			currentPlayer.actionPoints = 1;
+			CompletePlayerActions ();
+		}
 		if (Input.GetKeyDown (KeyCode.Tab)) {
 			nextInput = PlayerInput.NEXT_CHARACTER;
 			SelectNextPlayer ();
@@ -366,7 +371,7 @@ public class Level : MonoBehaviour {
 		currentPlayer.actionPoints--;
 		if (currentPlayer.actionPoints <= 0) {
 			if (monsters.Count <= 0) {
-				score--;
+				gameInfo.creditsEarned--;
 			}
 			if (!SelectNextPlayer ()) {
 				fsm.PerformTransition (FsmTransitionId.Complete);

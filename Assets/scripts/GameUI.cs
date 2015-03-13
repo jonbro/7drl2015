@@ -63,14 +63,15 @@ public class GameUI : MonoBehaviour
 		VectorGui.Label ("ARROW: Move-Atk", 0.1f, Color.white);
 		VectorGui.Label ("TAB: Next Unit", 0.1f, Color.white);
 		VectorGui.Label ("MOUSE: Get Info", 0.1f, Color.white);
+		VectorGui.Label ("E: End Player Turn", 0.1f, Color.white);
 
 		VectorGui.SetPosition (new Vector2(-.35f, -7.65f));
-		VectorGui.Label (System.String.Format("Credits: {0} Level: {1} / {2}", level.score, level.currentLevel, level.contract.rooms), 0.1f, Color.white);
+		VectorGui.Label (System.String.Format("Credits: {0} (of {1}) Level: {2} / {3}", level.gameInfo.creditsEarned, level.gameInfo.totalCredits, level.currentLevel, level.contract.rooms), 0.1f, Color.white);
 		foreach (String description in itemDescription) {
 			VectorGui.Label (description, 0.1f, Color.white);
 		}
 		if (level.monsters.Count == 0) {
-			VectorGui.Label ("-1 Score Per Player Turn", 0.1f, Color.white);
+			VectorGui.Label ("-1 Credit Per Player Turn", 0.1f, Color.white);
 			VectorGui.Label ("Press Space to go to next level", 0.1f, Color.white);
 		}
 	}

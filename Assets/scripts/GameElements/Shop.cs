@@ -34,7 +34,7 @@ public class Shop : MonoBehaviour {
 	void RebuildInfoStrings(){
 		string introductionText = "A successful misson. But was it enough?\n" +
 			"you now have {0} days to pay back the {1} credits you owe,\nbefore you are repossesed.";
-		introductionText = System.String.Format (introductionText, gameInfo.daysRemaining, gameInfo.totalCredits-gameInfo.creditsPaid);
+		introductionText = System.String.Format (introductionText, gameInfo.daysRemaining, gameInfo.totalCredits-gameInfo.creditsEarned);
 		introStrings = introductionText.Split ('\n');
 	}
 	void FixPowerPositions(){
@@ -77,11 +77,11 @@ public class Shop : MonoBehaviour {
 				}
 			}
 			VectorGui.SetPosition (new Vector2(-4.35f+count%2*8, -1.65f-count/2*2));
-			VectorGui.Label ("sale value: "+cp.powerup.saleValue, 0.1f, c);
+			VectorGui.Label ("scrap value: "+cp.powerup.saleValue, 0.1f, c);
 			count++;
 		}
 		if (sold) {
-			gameInfo.creditsPaid += toSell.powerup.saleValue;
+			gameInfo.creditsEarned += toSell.powerup.saleValue;
 			RebuildInfoStrings ();
 			toSell.svg.Destroy ();
 			toSell.character.powerups.Remove (toSell.powerup);
@@ -91,7 +91,7 @@ public class Shop : MonoBehaviour {
 		VectorGui.SetPosition (new Vector2(-5.35f, -7.65f));
 		VectorGui.Label ("Click to sell items", 0.1f, Color.white);
 		VectorGui.SetPosition (new Vector2 (-5.35f, -8.65f));
-		if (gameInfo.totalCredits - gameInfo.creditsPaid > 0) {
+		if (gameInfo.totalCredits - gameInfo.creditsEarned > 0) {
 			VectorGui.Label ("Press space to take new contract", 0.1f, Color.white);
 			if (Input.GetKeyDown (KeyCode.Space)) {
 				PickContract ();
