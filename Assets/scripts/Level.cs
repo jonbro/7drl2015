@@ -306,7 +306,7 @@ public class Level : MonoBehaviour {
 		if (currentPlayer.canUsePowerup && nextInput == PlayerInput.POWER1 || nextInput == PlayerInput.POWER2) {
 			int powerSlot = (nextInput == PlayerInput.POWER1) ? 0 : 1;
 			// check to see if the player has a power in the current slot, and use it if so
-			if (currentPlayer.powerups [powerSlot] != null && currentPlayer.powerups [powerSlot].OnUse (currentPlayer, this)) {
+			if (currentPlayer.powerups.Count > powerSlot && currentPlayer.powerups [powerSlot] != null && currentPlayer.powerups [powerSlot].OnUse (currentPlayer, this)) {
 				currentPlayer.actionPoints = 1;
 				CompletePlayerActions ();
 			}
@@ -321,17 +321,19 @@ public class Level : MonoBehaviour {
 				// check to see if the player is on a powerup, and apply it if they are
 				if (itemMap [currentPlayer.x, currentPlayer.y] != null) {
 					RLItem item = itemMap [currentPlayer.x, currentPlayer.y];
-					items.Remove (item);
-					UpdateMaps ();
 					// is this an item that takes up inventory slots
 					if (item.powerUp.OnPickup (currentPlayer, this)) {
-						currentPlayer.powerups.Add (item.powerUp);
-						if (currentPlayer.powerups.Count == 3) {
-							// only allow 2 powers per player
-							currentPlayer.powerups.RemoveAt (0);
+						if (currentPlayer.powerups.Count < 2) {
+							currentPlayer.powerups.Add (item.powerUp);
+							item.Destroy ();
+							items.Remove (item);
+							UpdateMaps ();
 						}
+					} else {
+						item.Destroy ();
+						items.Remove (item);
+						UpdateMaps ();
 					}
-					item.Destroy ();
 				}
 				CompletePlayerActions ();
 			}

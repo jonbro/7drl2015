@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public class HoverDescription {
+	public Rect targetRect;
+	public string displayText;
+}
 // displays all the current stuff for the players
 public class GameUI : MonoBehaviour
 {
@@ -13,8 +17,25 @@ public class GameUI : MonoBehaviour
 		level = _level;
 	}
 	Vector2i lastPosition;
+	List<HoverDescription> hovers = new List<HoverDescription>();
+	int currentHoverDesc = 0;
+	void ResetHovers(){
+		foreach (HoverDescription hd in hovers) {
+			hd.targetRect = new Rect (0,0,0,0);
+		}
+		currentHoverDesc = -1;
+	}
+	HoverDescription GetNextHover(){
+		currentHoverDesc++;
+		if (hovers.Count <= currentHoverDesc) {
+			hovers.Add (new HoverDescription ());
+		}
+		return hovers [currentHoverDesc];
+	}
 	public void Update(){
 		float vPosition = 0.35f;
+		// clear out all the hover descriptions
+		ResetHovers ();
 		foreach (RLCharacter c in level.players) {
 			VectorGui.SetPosition (new Vector2(10.65f, vPosition));
 			vPosition -= 1;
@@ -27,35 +48,58 @@ public class GameUI : MonoBehaviour
 			VectorGui.SetPosition (new Vector2 (10.65f, vPosition));
 			// display the powers the player can use
 			for (int i = 0; i < c.powerups.Count; i++) {
+				Vector3 hoverStart = VectorGui.Pen ().position;
 				VectorGui.Label ((i+1)+":"+c.powerups[i].DisplayText(), 0.1f, color);
+				Vector3 hoverEnd = VectorGui.Pen ().position;
+				HoverDescription hover = GetNextHover ();
+				hover.targetRect = new Rect(hoverStart.x, hoverStart.y-0.45f, 8, 0.45f);
+				hover.displayText = c.powerups [i].DescriptionText ();
 			}
 			vPosition -= 2;
 		}
 		// determine if there is a character underneath the cursor, and display the range highlights if so
-		Vector2i mp = Grid.WorldToGrid (Camera.main.ScreenToWorldPoint (new Vector3(Input.mousePosition.x, Input.mousePosition.y)));
+		Vector3 mpWorld = Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y));
+		Vector2i mp = Grid.WorldToGrid (mpWorld);
 		bool displayHighlights = false;
+		bool foundItem = true;
 		if (
-			(!lastPosition.Equals(mp))
+			(!lastPosition.Equals (mp))
 			&& mp.x >= 0 && mp.x < level.sx
-			&& mp.y >= 0 && mp.y < level.sy
-		){
+			&& mp.y >= 0 && mp.y < level.sy) {
+			foundItem = false;
 			itemDescription.Clear ();
 			lastPosition = mp;
 			if (level.playerMap [mp.x, mp.y] != null) {
 				level.playerMap [mp.x, mp.y].DisplayFireRadius (level.map, level.monsterMap, level.highlights);
 				displayHighlights = true;
 			} 
-			if(level.monsterMap [mp.x, mp.y] != null) {
+			if (level.monsterMap [mp.x, mp.y] != null) {
 				level.monsterMap [mp.x, mp.y].DisplayFireRadius (level.map, level.playerMap, level.highlights);
 				itemDescription.Add (level.monsterMap [mp.x, mp.y].info.description);
 				displayHighlights = true;
+				foundItem = true;
 			}
-			if(level.itemMap [mp.x, mp.y] != null) {
-				itemDescription.Add (level.itemMap [mp.x, mp.y].powerUp.DescriptionText());
+			if (level.itemMap [mp.x, mp.y] != null) {
+				itemDescription.Add (level.itemMap [mp.x, mp.y].powerUp.DescriptionText ());
+				foundItem = true;
 			}
-			if(!displayHighlights){
+			if (!displayHighlights) {
 				level.HideHighlights ();
 			}
+		} else if(!lastPosition.Equals (mp)) {
+			foundItem = false;
+		}
+
+		// check to see if we are in any of the hoverrects
+		foreach (HoverDescription hd in hovers) {
+			if (hd.targetRect.Contains (new Vector2 (mpWorld.x, mpWorld.y))) {
+				itemDescription.Clear ();
+				itemDescription.Add (hd.displayText);
+				foundItem = true;
+			}
+		}
+		if (!foundItem) {
+			itemDescription.Clear ();
 		}
 		// display the console with the current state of the game
 		// display instructions
