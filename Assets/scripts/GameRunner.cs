@@ -41,7 +41,8 @@ public class GameRunner : MonoBehaviour {
 	}
 	void Start(){
 		SetupGameInfo ();
-//		AddRandomScrap ();
+		AddRandomScrap ();
+//		SetupShop ();
 		if (jumpToGame)
 			OnGameOver ();
 		else

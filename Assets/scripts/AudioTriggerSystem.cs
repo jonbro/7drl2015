@@ -157,9 +157,7 @@ public class AudioTriggerSystem : MonoBehaviour {
 			queuedClips.Add (name);
 	}
 	public void PlayClipImmediate(string s){
-		Debug.Log ("looking for clip: " + s);
 		if (clips.ContainsKey (s)) {
-			Debug.Log ("playing clip: " + s);
 			transform.position = Camera.main.transform.position;
 			audio.PlayOneShot (clips [s].GetRandom(), PlayerPrefs.GetFloat ("sfxLevel")*0.6f);
 		}

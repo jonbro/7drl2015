@@ -33,8 +33,8 @@ Material:
       data:
         first:
           name: _Shape
-        second: {r: 30.9285736, g: .5, b: 13.0500317, a: 0}
+        second: {r: 42.8571472, g: .5, b: 18.0831852, a: 0}
       data:
         first:
           name: _Offset
-        second: {r: -207.321411, g: -332.172882, b: -10, a: 0}
+        second: {r: -287.142853, g: -460.285736, b: -10, a: 0}
