@@ -418,8 +418,8 @@ public class Level : MonoBehaviour {
 	}
 	void CompletePlayerActions(){
 		UpdatePlayerMap ();
-		playerActionPoints--;
 		AudioTriggerSystem.instance ().PlayClipImmediate (playerActionPoints+"moveleft");
+		playerActionPoints--;
 		spawnTimer++;
 		if (spawnTimer - apsPerSpawn >= 0) {
 			spawnTimer = 0;
@@ -482,17 +482,18 @@ public class Level : MonoBehaviour {
 					enemy.transform.position = Grid.GridToWorld(enemy.x, enemy.y);
 				});
 				enemy.healthPoints--;
-				if (monsters.Contains (enemy))
-					Camera.main.audio.PlayOneShot (Resources.Load ("sounds/hit_enemy") as AudioClip);
-				else
-					Camera.main.audio.PlayOneShot (Resources.Load ("sounds/hit_player") as AudioClip);
+				if (monsters.Contains (enemy)) {
+					AudioTriggerSystem.instance ().PlayClipImmediate ("player_attack");
+				} else {
+//					AudioTriggerSystem.instance ().PlayClipImmediate ("player_attack");
+				}
 				if (enemy.healthPoints <= 0) {
 					if (monsters.Contains (enemy)) {
 						// killing enemy
 						monsters.Remove (enemy);
 						gamePanel.elements.Remove (enemy);
 						enemy.Destroy ();
-
+						AudioTriggerSystem.instance ().PlayClipImmediate ("enemy_defeated");
 //						enemy.stun = true;
 					} else {
 						// killing player

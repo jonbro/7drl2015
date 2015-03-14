@@ -125,6 +125,10 @@ public class AudioTriggerSystem : MonoBehaviour {
 		LoadClip("getitem");
 		LoadClip("sellitem");
 		LoadClip("use_powerup");
+
+		LoadClip("all_clear");
+		LoadClip("enemy_defeated");
+		LoadClip("player_attack");
 	}
 	void LoadClip(string clipName){
 		AudioClip c = Resources.Load<AudioClip> ("sounds/" + clipName);
@@ -157,7 +161,7 @@ public class AudioTriggerSystem : MonoBehaviour {
 		if (clips.ContainsKey (s)) {
 			Debug.Log ("playing clip: " + s);
 			transform.position = Camera.main.transform.position;
-			audio.PlayOneShot (clips [s].GetRandom(), PlayerPrefs.GetFloat ("sfxLevel"));
+			audio.PlayOneShot (clips [s].GetRandom(), PlayerPrefs.GetFloat ("sfxLevel")*0.6f);
 		}
 	}
 	public void PlayQueue(bool fadeLoops = false, float fadeSpeed = 1.0f){

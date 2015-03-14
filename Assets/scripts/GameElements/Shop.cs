@@ -75,6 +75,7 @@ public class Shop : MonoBehaviour {
 				if (Input.GetMouseButtonDown (0)) {
 					toSell = cp;
 					sold = true;
+					AudioTriggerSystem.instance ().PlayClipImmediate ("sellitem");
 				}
 			}
 			VectorGui.SetPosition (new Vector2(-4.35f+count%2*8, -1.65f-count/2));
