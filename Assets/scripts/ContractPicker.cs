@@ -41,9 +41,9 @@ public class ContractInfo{
 		}
 
 	};
-	public void Init(){
+	public void Init(int maxDays){
 		rooms = Random.Range (3, 6);
-		days = Random.Range (2, 5);
+		days = Random.Range (2, Mathf.Min(5, maxDays));
 		switch(nameType){
 		case NameType.SHIP:
 			name = NameGen.GetShipName ();
@@ -89,7 +89,7 @@ public class NameGen {
 			postfix = Random.Range (0, 200).ToString();
 		}
 		string mainString = instance.NSAStrings [Random.Range (0, instance.NSAStrings.Count)].ToString ();
-		if (mainString.Length < 7 || (mainString.Split (' ').Length == 1 && Random.Range(0, 5) == 0)) {
+		if (mainString.Length < 7 || (mainString.Split (' ').Length == 1 && mainString.Length < 12 && Random.Range(0, 5) == 0)) {
 			mainString += " " + instance.NSAStrings [Random.Range (0, instance.NSAStrings.Count)].ToString ();
 		}
 		return mainString + postfix;
@@ -116,7 +116,7 @@ public class ContractPicker : MonoBehaviour {
 		List<ContractInfo> contractsToShuffle = new List<ContractInfo> (ContractInfo.contracts);
 		contractsToShuffle = contractsToShuffle.Shuffle ();
 		for (int i = 0; i < 3; i++) {
-			contractsToShuffle [i].Init ();
+			contractsToShuffle [i].Init (gameInfo.daysRemaining);
 			contracts.Add (contractsToShuffle [i]);
 		}
 		panel = Panel.Create ();

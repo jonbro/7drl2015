@@ -30,7 +30,7 @@ public class Level : MonoBehaviour {
 	public List<RLItem> items;
 	public int currentPlayerCounter = 0;
 	public List<RLCharacter> monsters;
-	FsmSystem fsm;
+	public FsmSystem fsm;
 	GameUI ui;
 	RL.Pathfinder pf = new RL.Pathfinder ();
 	public System.Action OnGameOver, OnContractComplete;
@@ -42,6 +42,10 @@ public class Level : MonoBehaviour {
 	public int score = 5;
 	public ContractInfo contract;
 	public GameInfo gameInfo;
+	public int playerActionPoints;
+	public int basePlayerActionPoints = 4;
+	public int spawnTimer = 0;
+	public int apsPerSpawn = 13;
 	public void Build(Panel _gamePanel, GameInfo _gameInfo){
 		gameInfo = _gameInfo;
 		gamePanel = _gamePanel;
@@ -74,9 +78,13 @@ public class Level : MonoBehaviour {
 		fsm.Start ();
 	}
 	public void InitialGen(){
+		while (gameInfo.crew.Count < 3) {
+			gameInfo.crew.Add (new RLPlayerCharacterData ());
+		}
 		for (int i = 0; i < gameInfo.crew.Count; i++) {
 			RLCharacter player = RLCharacter.Create (0, 0, "Player", new RLCharacterInfo());
 			player.characterData = gameInfo.crew [i];
+			player.maxActionPoints = 4;
 			exitPlayers.Add (player);
 			player.color = GameColors.GetColor ("player");
 			player.gameObject.name = "player"+i;
@@ -108,6 +116,7 @@ public class Level : MonoBehaviour {
 		fsm.PerformTransition (FsmTransitionId.Complete);
 	}
 	public bool GenLevelInternal(){
+		spawnTimer = 0;
 		// incase this runs a few times, need to copy the players into the exit players so it doesn't fail
 		// destroy everything on the existing panel, and build a new level
 		foreach (DisplayElement de in gamePanel.elements) {
@@ -151,17 +160,12 @@ public class Level : MonoBehaviour {
 		}
 		currentPlayerCounter = 0;
 		currentPlayer = players[currentPlayerCounter];
-
+		SelectNextPlayer ();
 		for (int i = 0; i < (currentLevel+1); i++) {
-			Vector2i monsterPosition = FindOpenPosition ();
-			RLCharacter monster = RLCharacter.Create (monsterPosition.x, monsterPosition.y, "Enemy", RLCharacterInfo.GetRandomMonster());
-			monster.color = GameColors.GetColor ("enemy");
-			gamePanel.Add (monster);
-			monsters.Add (monster);
-			UpdateMaps ();
+			AddMonster ();
 		}
 		// add items to the map
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 2; i++) {
 			AddItem (PowerUp.GetPowerup ());
 		}
 		// guarantee at least one score token
@@ -176,7 +180,31 @@ public class Level : MonoBehaviour {
 					return false;
 			}
 		}
+		MusicSystem.GameNextEnemy ();
 		return true;
+	}
+	void AddMonster(){
+		Vector2i monsterPosition = FindOpenPosition ();
+		// confirm that this position can access the players
+		bool hasPath = false;
+		while (hasPath == false) {	
+			bool allHavePath = true;
+			foreach (RLCharacter p in players) {
+				List<Vector2i> path = pf.FindPath (p.position, monsterPosition, OneCostFunction, map); 
+				if (!HasPath (path, p.position, monsterPosition)) {
+					allHavePath = false;
+					monsterPosition = FindOpenPosition ();
+					break;
+				}
+			}
+			if(allHavePath)
+				hasPath = true;
+		}
+		RLCharacter monster = RLCharacter.Create (monsterPosition.x, monsterPosition.y, "Enemy", RLCharacterInfo.GetRandomMonster());
+		monster.color = GameColors.GetColor ("enemy");
+		gamePanel.Add (monster);
+		monsters.Add (monster);
+		UpdateMaps ();
 	}
 	void AddItem(PowerUp itemToAdd){
 		Vector2i itemPosition = FindOpenPosition ();
@@ -231,13 +259,13 @@ public class Level : MonoBehaviour {
 		PlayerSetup ();
 	}
 	public void PlayerSetup(){
+		playerActionPoints = basePlayerActionPoints;
 		foreach (RLCharacter p in players) {
 			p.actionPoints = p.maxActionPoints;
 			p.SetState("overwatch", false);
 			p.canUsePowerup = true;
+			// check to see if there is any powerups that mod APs
 		}
-		currentPlayerCounter = 0;
-		SetCurrentPlayer ();
 	}
 	void SetCurrentPlayer(){
 		currentPlayer = players [currentPlayerCounter];
@@ -259,6 +287,7 @@ public class Level : MonoBehaviour {
 		#if UNITY_STANDALONE
 		nextInput = PlayerInput.NONE;
 		#endif
+		int powerupUsed = -1;
 		// get the keycode needed for moving things around the map
 		if (Input.GetKeyDown (KeyCode.DownArrow)) {
 			nextInput = PlayerInput.DOWN;
@@ -274,13 +303,19 @@ public class Level : MonoBehaviour {
 		}
 		if (Input.GetKeyDown (KeyCode.Alpha1)) {
 			nextInput = PlayerInput.POWER1;
+			powerupUsed = 0;
 		}
 		if (Input.GetKeyDown (KeyCode.Alpha2)) {
 			nextInput = PlayerInput.POWER2;
+			powerupUsed = 1;
 		}
-		if (Input.GetKeyDown (KeyCode.E)) {
-			currentPlayer.actionPoints = 1;
-			CompletePlayerActions ();
+		if (Input.GetKeyDown (KeyCode.Alpha3)) {
+			nextInput = PlayerInput.POWER1;
+			powerupUsed = 2;
+		}
+		if (Input.GetKeyDown (KeyCode.Alpha4)) {
+			nextInput = PlayerInput.POWER2;
+			powerupUsed = 3;
 		}
 		if (Input.GetKeyDown (KeyCode.Tab)) {
 			nextInput = PlayerInput.NEXT_CHARACTER;
@@ -303,11 +338,17 @@ public class Level : MonoBehaviour {
 		if (nextInput == PlayerInput.LEFT) {
 			deltaD = new Vector2i (-1, 0);
 		}
-		if (currentPlayer.canUsePowerup && nextInput == PlayerInput.POWER1 || nextInput == PlayerInput.POWER2) {
-			int powerSlot = (nextInput == PlayerInput.POWER1) ? 0 : 1;
+		if (currentPlayer == null) {
+			SelectNextPlayer ();
+		}
+		if (currentPlayer.canUsePowerup && powerupUsed >= 0) {
+			int powerSlot = powerupUsed;
 			// check to see if the player has a power in the current slot, and use it if so
-			if (currentPlayer.powerups.Count > powerSlot && currentPlayer.powerups [powerSlot] != null && currentPlayer.powerups [powerSlot].OnUse (currentPlayer, this)) {
-				currentPlayer.actionPoints = 1;
+			if (currentPlayer.powerups.Count > powerSlot 
+				&& currentPlayer.powerups [powerSlot] != null 
+				&& currentPlayer.powerups [powerSlot].OnUse (currentPlayer, this))
+			{
+				AudioTriggerSystem.instance ().PlayClipImmediate ("use_powerup");
 				CompletePlayerActions ();
 			}
 		}
@@ -323,7 +364,8 @@ public class Level : MonoBehaviour {
 					RLItem item = itemMap [currentPlayer.x, currentPlayer.y];
 					// is this an item that takes up inventory slots
 					if (item.powerUp.OnPickup (currentPlayer, this)) {
-						if (currentPlayer.powerups.Count < 2) {
+						if (currentPlayer.powerups.Count < 4) {
+							AudioTriggerSystem.instance ().PlayClipImmediate ("getitem");
 							currentPlayer.powerups.Add (item.powerUp);
 							item.Destroy ();
 							items.Remove (item);
@@ -345,6 +387,12 @@ public class Level : MonoBehaviour {
 			Destroy (ui.gameObject);
 			Destroy (gameObject);
 		}else{
+			for (int i = monsters.Count - 1; i >= 0; i--) {
+				gamePanel.elements.Remove (monsters[i]);
+				monsters[i].Destroy ();
+				monsters.Remove (monsters[i]);
+			}
+
 			PlayerSetupNewLevel ();
 			foreach (RLCharacter p in players) {
 				exitPlayers.Add (p);
@@ -370,12 +418,26 @@ public class Level : MonoBehaviour {
 	}
 	void CompletePlayerActions(){
 		UpdatePlayerMap ();
-		currentPlayer.actionPoints--;
-		if (currentPlayer.actionPoints <= 0) {
-			if (monsters.Count <= 0) {
-				gameInfo.creditsEarned--;
-			}
-			if (!SelectNextPlayer ()) {
+		playerActionPoints--;
+		AudioTriggerSystem.instance ().PlayClipImmediate (playerActionPoints+"moveleft");
+		spawnTimer++;
+		if (spawnTimer - apsPerSpawn >= 0) {
+			spawnTimer = 0;
+			MusicSystem.GameNextEnemy ();
+			AddMonster ();
+		}
+		int nonGhostCount = 0;
+		foreach (RLCharacter m in monsters) {
+			if (!m.ghost && !m.stun)
+				nonGhostCount++;
+		}
+		if (nonGhostCount == 0) {
+			MoveToNextLevel ();
+		} else {
+			if (playerActionPoints <= 0) {
+				if (monsters.Count <= 0) {
+					gameInfo.creditsEarned--;
+				}
 				fsm.PerformTransition (FsmTransitionId.Complete);
 			}
 		}
@@ -406,11 +468,11 @@ public class Level : MonoBehaviour {
 			map.IsValidTile(currentCell.x, currentCell.y) 
 			&& map [currentCell.x, currentCell.y] == RL.Objects.OPEN
 			&& blockerMap[currentCell.x, currentCell.y] == null
-			&& count < firingCharacter.info.fireRadius
+			&& count < firingCharacter.fireRange
 		){
 			count++;
 			RLCharacter enemy = cMap [currentCell.x, currentCell.y];
-			if (enemy != null) {
+			if (enemy != null && !enemy.stun) {
 				LeanTween.move (enemy.gameObject, new Vector3[] {
 					enemy.transform.position + new Vector3 (Random.value, Random.value, 0f)*0.25f,
 					enemy.transform.position + new Vector3 (Random.value, Random.value, 0f)*0.25f,
@@ -424,14 +486,21 @@ public class Level : MonoBehaviour {
 					Camera.main.audio.PlayOneShot (Resources.Load ("sounds/hit_enemy") as AudioClip);
 				else
 					Camera.main.audio.PlayOneShot (Resources.Load ("sounds/hit_player") as AudioClip);
-				if (enemy.healthPoints == 0) {
-					gamePanel.elements.Remove (enemy);
+				if (enemy.healthPoints <= 0) {
 					if (monsters.Contains (enemy)) {
+						// killing enemy
 						monsters.Remove (enemy);
-					}
-					else
+						gamePanel.elements.Remove (enemy);
+						enemy.Destroy ();
+
+//						enemy.stun = true;
+					} else {
+						// killing player
+						gameInfo.crew.Remove (enemy.characterData);
 						players.Remove (enemy);
-					enemy.Destroy ();
+						gamePanel.elements.Remove (enemy);
+						enemy.Destroy ();
+					}
 				}
 				return true;
 			}
@@ -518,20 +587,28 @@ public class Level : MonoBehaviour {
 		StartCoroutine (MonsterUpdateCoro ());
 	}
 	public IEnumerator MonsterUpdateCoro(){
+		yield return new WaitForSeconds (0.55f);
 		CheckOverwatch ();
 		for (int i = monsters.Count - 1; i >= 0; i--) {
 			RLCharacter m = monsters [i];
 			while (m.actionPoints > 0) {
 				// path towards the player or attack. Should probably add overwatch support at some point for asshole monsters
-				if (MonsterAttack (m)) {
+				if (m.stun) {
 					m.actionPoints = 0;
-					yield return new WaitForSeconds (0.1f);
+					m.stun = false;
+					m.ghost = true;
+				}else if (MonsterAttack (m)) {
+					m.actionPoints = 0;
+					AudioTriggerSystem.instance ().PlayClipImmediate ("enemyattack");
+					yield return new WaitForSeconds (0.15f);
 					continue;
 				}else if(MonsterMove (m)){
+					AudioTriggerSystem.instance ().PlayClipImmediate ("enemymove");
+
 					CheckOverwatch ();
 					if(m != null)
 						m.actionPoints--;
-					yield return new WaitForSeconds (0.1f);
+					yield return new WaitForSeconds (0.15f);
 					// should do a little delay here to visually process everything
 				}
 			}
@@ -539,7 +616,7 @@ public class Level : MonoBehaviour {
 		foreach (RLCharacter m in monsters) {
 			m.actionPoints = 2;
 		}
-		StartCoroutine (WaitAndCall(.25f, () => {
+		StartCoroutine (WaitAndCall(.55f, () => {
 			if(players.Count == 0)
 				fsm.PerformTransition (FsmTransitionId.GameOver);
 			else
@@ -596,6 +673,13 @@ public class Level : MonoBehaviour {
 				highlights [x, y].color = Color.clear;
 			}
 		}
+	}
+	void OnDestroy(){
+		foreach (DisplayElement highlight in highlightPanel.elements) {
+			highlight.Destroy ();
+		}
+		if(highlightPanel != null)
+			Destroy (highlightPanel.gameObject);
 	}
 	void Update(){
 		if(fsm != null)

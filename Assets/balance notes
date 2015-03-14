@@ -5,3 +5,10 @@ starting item sale value = 4 - 1 per usage?
 1.5 per level (4*4*3 = 48 for item sales)
 
 should calculate difficulty as a function of the number of days + the credits you can earn minimum on a job
+second loop kills me, so I need to buff items obviously
+
+score up powers take up a powerup slot
+
+//var dic = {"key":value}
+
+unsold powerups multiply their value

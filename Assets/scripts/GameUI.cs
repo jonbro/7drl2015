@@ -34,6 +34,13 @@ public class GameUI : MonoBehaviour
 	}
 	public void Update(){
 		float vPosition = 0.35f;
+
+		VectorGui.SetPosition (new Vector2(-6.35f, 1.35f));
+		if (level.fsm.CurrentStateID == FsmStateId.Monster) {
+			VectorGui.Label ("Enemy Turn", 0.28f, GameColors.GetColor("enemy"));
+		} else {
+			VectorGui.Label ("AP:" + level.playerActionPoints, 0.28f, Color.white);
+		}
 		// clear out all the hover descriptions
 		ResetHovers ();
 		foreach (RLCharacter c in level.players) {
@@ -43,17 +50,17 @@ public class GameUI : MonoBehaviour
 			if (c == level.currentPlayer)
 				color = GameColors.GetColor("player");
 			VectorGui.Label("HP:"+c.healthPoints, 0.1f, color);
-			VectorGui.Label("AP:"+c.actionPoints, 0.1f, color);
+//			VectorGui.Label("AP:"+c.actionPoints, 0.1f, color);
 
 			VectorGui.SetPosition (new Vector2 (10.65f, vPosition));
 			// display the powers the player can use
 			for (int i = 0; i < c.powerups.Count; i++) {
 				Vector3 hoverStart = VectorGui.Pen ().position;
-				VectorGui.Label ((i+1)+":"+c.powerups[i].DisplayText(), 0.1f, color);
+				VectorGui.Label ((i+1)+":"+c.powerups[i].DisplayText()+"("+c.powerups[i].saleValue+")", 0.1f, color);
 				Vector3 hoverEnd = VectorGui.Pen ().position;
 				HoverDescription hover = GetNextHover ();
 				hover.targetRect = new Rect(hoverStart.x, hoverStart.y-0.45f, 8, 0.45f);
-				hover.displayText = c.powerups [i].DescriptionText ();
+				hover.displayText = c.powerups [i].DescriptionText () + " sale value " +c.powerups[i].saleValue;
 			}
 			vPosition -= 2;
 		}
@@ -104,10 +111,10 @@ public class GameUI : MonoBehaviour
 		// display the console with the current state of the game
 		// display instructions
 		VectorGui.SetPosition (new Vector2(-6.35f, 0.35f));
+		VectorGui.Label ("NEXT SPAWN: "+(level.apsPerSpawn-level.spawnTimer), 0.1f, Color.white);
 		VectorGui.Label ("ARROW: Move-Atk", 0.1f, Color.white);
 		VectorGui.Label ("TAB: Next Unit", 0.1f, Color.white);
 		VectorGui.Label ("MOUSE: Get Info", 0.1f, Color.white);
-		VectorGui.Label ("E: End Player Turn", 0.1f, Color.white);
 
 		VectorGui.SetPosition (new Vector2(-.35f, -7.65f));
 		VectorGui.Label (System.String.Format("Credits: {0} (of {1}) Level: {2} / {3}", level.gameInfo.creditsEarned, level.gameInfo.totalCredits, level.currentLevel, level.contract.rooms), 0.1f, Color.white);

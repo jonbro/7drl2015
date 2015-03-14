@@ -17,7 +17,10 @@ public class SvgRenderer : LineRenderer {
 	public void LoadSvgFromResources(string svgName){
 		TextAsset asset = Resources.Load ("svgs/Generated Assets/" + svgName) as TextAsset;
 		if (asset != null) {
+			enabled = true;
 			LoadSvgFromTextAsset (asset);
+		} else {
+			enabled = false;
 		}
 	}
 	public void LoadSvgFromTextAsset(TextAsset asset){

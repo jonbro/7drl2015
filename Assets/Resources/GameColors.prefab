@@ -64,6 +64,10 @@ MonoBehaviour:
     color: {r: .723783135, g: .86936146, b: .870588243, a: 1}
   - name: planet3
     color: {r: .893644691, g: .925490201, b: .46818915, a: 1}
+  - name: ghost
+    color: {r: 1, g: .662745118, b: .860025048, a: 1}
+  - name: stunghost
+    color: {r: .427450985, g: .283291042, b: .367618561, a: 1}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

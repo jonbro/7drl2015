@@ -39,7 +39,7 @@ public class RLPlayerCharacterData{
 }
 public class RLCharacter : DisplayElement
 {
-	public RLPlayerCharacterData characterData;
+	public RLPlayerCharacterData characterData = new RLPlayerCharacterData ();
 	Dictionary<string, bool> states = new Dictionary<string, bool>();
 	SpriteRenderer actionPointDisplay, overwatchDisplay;
 	SvgRenderer healthPointDisplay, stateDisplay;
@@ -59,8 +59,27 @@ public class RLCharacter : DisplayElement
 			characterData.powerups = value;
 		}
 	}
+	bool _stun = false;
+	public bool stun{
+		get{ return _stun; }
+		set{ 
+			_stun = value; 
+			if (value)
+				color = GameColors.GetColor ("stunghost");
+		}
+	}
+
+	bool _ghost = false;
+	public bool ghost{
+		get{ return _ghost; }
+		set{ 
+			_ghost = value; 
+			if (value)
+				color = GameColors.GetColor ("ghost");
+		}
+	}
 	// overlay gfx, could potentially abstract?
-	int _maxActionPoints = 2;
+	int _maxActionPoints = 6;
 	public int maxActionPoints {
 		get{ 
 			int tempMax = _maxActionPoints;
@@ -73,7 +92,7 @@ public class RLCharacter : DisplayElement
 			_maxActionPoints = value;
 		}
 	}
-	int _actionPoints = 2;
+	int _actionPoints = 6;
 	public int actionPoints{
 		get { return _actionPoints; }
 		set {
@@ -104,7 +123,16 @@ public class RLCharacter : DisplayElement
 			GetComponent<SvgRenderer>().colorProperty = originalColor;
 		}
 	}
-	public int fireRange = 3;
+	public int fireRange {
+		get{
+			int baseRange = info.fireRadius;
+			foreach (PowerUp p in powerups) {
+				baseRange += p.rangeModifier;
+			}
+			return baseRange;
+		}
+		set {info.fireRadius = value; }
+	}
 	bool _overwatch = false;
 	public bool overwatch{
 		get { return _overwatch; }
@@ -216,7 +244,7 @@ public class RLCharacter : DisplayElement
 			Vector2i delta = new Vector2i (RL.Map.nDir [i, 0], RL.Map.nDir [i, 1]);
 			Vector2i currentCell = position + delta;
 			int count = 0;
-			while (map.IsValidTile (currentCell.x, currentCell.y) && map [currentCell.x, currentCell.y] == RL.Objects.OPEN && count < info.fireRadius) {
+			while (map.IsValidTile (currentCell.x, currentCell.y) && map [currentCell.x, currentCell.y] == RL.Objects.OPEN && count < fireRange) {
 				count++;
 				RLCharacter enemy = enemyMap [currentCell.x, currentCell.y];
 				highlights [currentCell.x, currentCell.y].color = Color.red;

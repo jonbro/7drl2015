@@ -1,7 +1,56 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-
+public static class MusicSystem{
+	public static void Title(){
+		AudioTriggerSystem.instance ().QueueClip ("bass");
+		AudioTriggerSystem.instance ().PlayQueue (true);
+	}
+	public static void Contract(){
+		AudioTriggerSystem.instance ().QueueClip ("bass");
+		AudioTriggerSystem.instance ().QueueClip ("lowbass");
+		AudioTriggerSystem.instance ().PlayQueue (true, 1);
+	}
+	public static void GameNextEnemy(){
+		AudioTriggerSystem.instance ().QueueClip ("bass");
+		if (Random.Range (0, 5) > 0) {
+			switch (Random.Range (0, 5)) {
+			case 0:
+				AudioTriggerSystem.instance ().QueueClip("drumcutup1-drive_fixed");
+				break;
+			case 1:
+				AudioTriggerSystem.instance ().QueueClip("drumcutup2");
+				break;
+			case 2:
+				AudioTriggerSystem.instance ().QueueClip("drumcutup3");
+				break;
+			case 3:
+				AudioTriggerSystem.instance ().QueueClip("drums");
+				break;
+			default:
+				AudioTriggerSystem.instance ().QueueClip("halfdrums");
+				break;
+			}
+		}
+		if (Random.Range (0, 3) == 0) {
+			AudioTriggerSystem.instance ().QueueClip("jazz");
+		}
+		if (Random.Range (0, 3) == 0) {
+			AudioTriggerSystem.instance ().QueueClip("tapdelay");
+		}
+		if (Random.Range (0, 3) == 0) {
+			AudioTriggerSystem.instance ().QueueClip("lowbass");
+		}
+		AudioTriggerSystem.instance ().PlayQueue (true, 1);
+	}
+	public static void GameOver(){
+	}
+	public static void Shop(){
+		AudioTriggerSystem.instance ().QueueClip ("bass");
+		AudioTriggerSystem.instance ().QueueClip ("tapdelay");
+		AudioTriggerSystem.instance ().PlayQueue (true, 1);
+	}
+}
 public class AudioLoop {
 	public AudioClip 	clip;
 	public float	 	fadeInTime, fadeOutTime;
@@ -25,7 +74,11 @@ public class AudioTriggerSystem : MonoBehaviour {
 		if (_instance == null) {
 			GameObject instanceGO = new GameObject ("AudioSystem");
 			DontDestroyOnLoad (instanceGO);
+			instanceGO.transform.position = Camera.main.transform.position;
+			instanceGO.transform.parent = Camera.main.transform;
+			instanceGO.AddComponent<AudioSource> ();
 			_instance = instanceGO.AddComponent<AudioTriggerSystem> ();
+
 			_instance.Init ();
 		}
 		return _instance;
@@ -51,18 +104,37 @@ public class AudioTriggerSystem : MonoBehaviour {
 		loopPlayer = Resources.Load<GameObject> ("loopPlayer");
 		main = Camera.main.audio;
 		// load in the clips we are going to use later
-		LoadLoop ("exc2");
+		LoadLoop ("bass", 0.5f);
+		LoadLoop ("lowbass", 0.5f);
+		LoadLoop ("tapdelay", 0.5f);
+		LoadLoop ("halfglitter_good", 0.5f);
+		LoadLoop ("haunt_partial", 0.5f);
 
+		LoadLoop("drumcutup1-drive_fixed", 0.5f);
+		LoadLoop("drumcutup2", 0.5f);
+		LoadLoop("drumcutup3", 0.5f);
+		LoadLoop("drums", 0.5f);
+		LoadLoop("halfdrums", 0.5f);
+	
+		LoadClip("1moveleft");
+		LoadClip("2moveleft");
+		LoadClip("3moveleft");
+		LoadClip("4moveleft");
+		LoadClip("enemyattack");
+		LoadClip("enemymove");
+		LoadClip("getitem");
+		LoadClip("sellitem");
+		LoadClip("use_powerup");
 	}
 	void LoadClip(string clipName){
-		AudioClip c = Resources.Load<AudioClip> ("Audio/" + clipName);
+		AudioClip c = Resources.Load<AudioClip> ("sounds/" + clipName);
 		if (c != null) {
 			clips [clipName] = new AudioClipBank();
 			clips [clipName].clips.Add (c);
 		}
 	}
 	void LoadClipToBank(string bankName, string clipName){
-		AudioClip c = Resources.Load<AudioClip> ("Audio/" + clipName);
+		AudioClip c = Resources.Load<AudioClip> ("sounds/" + clipName);
 		if (c != null) {
 			if(!clips.ContainsKey(bankName))
 				clips [bankName] = new AudioClipBank();
@@ -81,7 +153,9 @@ public class AudioTriggerSystem : MonoBehaviour {
 			queuedClips.Add (name);
 	}
 	public void PlayClipImmediate(string s){
+		Debug.Log ("looking for clip: " + s);
 		if (clips.ContainsKey (s)) {
+			Debug.Log ("playing clip: " + s);
 			transform.position = Camera.main.transform.position;
 			audio.PlayOneShot (clips [s].GetRandom(), PlayerPrefs.GetFloat ("sfxLevel"));
 		}
@@ -96,7 +170,12 @@ public class AudioTriggerSystem : MonoBehaviour {
 					// this is where you would fade it in
 					thisPlayer.Play ();
 					thisPlayer.gameObject.name = s;
-					thisPlayer.volume = PlayerPrefs.GetFloat ("musicLevel");
+					if (loops[s].fader != null) {
+						StopCoroutine (loops[s].fader);
+					}
+					thisPlayer.volume = 0;
+					loops [s].fader = FadeIn (thisPlayer, PlayerPrefs.GetFloat ("musicLevel"), fadeSpeed);
+					StartCoroutine (loops [s].fader);
 					playingLoops [s] = thisPlayer;
 				}
 			} else if (clips.ContainsKey (s)) {
@@ -135,6 +214,16 @@ public class AudioTriggerSystem : MonoBehaviour {
 		loopPlayers.Add (source.audio);
 		return source.audio;
 	}
+	IEnumerator FadeIn(AudioSource s, float target, float time){
+		if (time == 0)
+			time = 0.01f;
+		float startTime = Time.time;
+		while (s.volume < target) {
+			s.volume = Mathf.Lerp (0, target, (Time.time - startTime) / time);
+			yield return new WaitForEndOfFrame ();
+		}
+		s.volume = target;
+	}
 	IEnumerator FadeAndRemove(AudioSource s, float time){
 		if (time == 0)
 			time = 0.01f;
@@ -147,11 +236,6 @@ public class AudioTriggerSystem : MonoBehaviour {
 	}
 	// Update is called once per frame
 	void Update () {
-
-		foreach (string k in playingLoops.Keys) {
-			// this is where you would fade it out
-			playingLoops [k].volume = PlayerPrefs.GetFloat ("musicLevel");
-		}
 
 	}
 }

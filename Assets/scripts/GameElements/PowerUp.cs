@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+using System.Collections.Generic;
 public class PowerUp {
 	virtual public string DescriptionText(){
 		return "";
@@ -16,45 +16,43 @@ public class PowerUp {
 	virtual public string DisplayText(){
 		return "";
 	}
-	virtual public int saleValue {
-		get{ return Mathf.Max(0, 4-useCount); }
-	}
+	public int saleValue = 4;
 	public int useCount = 0;
 	public int actionPointModifier;
+	public int rangeModifier;
+	public static List<PowerUp> shuffledPowerups = new List<PowerUp> ();
+
 	public static PowerUp GetPowerup(){
-		switch (Random.Range (0, 6)) {
-		case 0:
-			return new PUDelayedHeal ();
-		case 1:
-			return new PUHealthUp ();
-		case 2:
-			return new PUFastMove ();
-		case 3:
-			return new PUScoreUp ();
-		case 4:
-			return new PUAPRefresh ();
-		default:
-			return new PUOverwatch ();
+		if (shuffledPowerups.Count == 0) {
+			shuffledPowerups.Add (new PUDelayedHeal ());
+			shuffledPowerups.Add (new PUHealthUp ());
+			shuffledPowerups.Add (new PUFastMove ());
+//			shuffledPowerups.Add (new PUScoreUp ());
+			shuffledPowerups.Add (new PUAPToCredit ());
+			shuffledPowerups.Add (new PUOverwatch ());
+			shuffledPowerups = shuffledPowerups.Shuffle ();
 		}
+		PowerUp toReturn = shuffledPowerups[shuffledPowerups.Count-1];
+		shuffledPowerups.Remove (toReturn);
+		return toReturn;
 	}
 }
 
 public class PUOverwatch : PowerUp {
-	override public string DisplayText(){ return "OVRWTCH"; }
+	override public string DisplayText(){ return "+1 RANGE"; }
 	override public string DescriptionText(){
-		return "END TURN AND FIRE IN RANGE ON ENEMY TURN";
+		return "+1 Range";
 	}
 	override public string SvgIcon(){
 		return "Overwatch";
 	}
 	override public bool OnPickup (RLCharacter c, Level level){
+		this.saleValue = 1;
+		this.rangeModifier = 1;
 		return true;
 	}
 	override public bool OnUse (RLCharacter c, Level level){
-		base.OnUse (c, level);
-		c.canUsePowerup = false;
-		c.SetState("overwatch",true);
-		return true;
+		return false;
 	}
 }
 public class PUEndTurn : PowerUp {
@@ -71,36 +69,45 @@ public class PUEndTurn : PowerUp {
 	}
 }
 public class PUHealthUp : PowerUp {
-	override public string DisplayText(){ return "ADD HP"; }
+	override public string DisplayText(){ return "1x FILL HP"; }
+
 	override public string DescriptionText(){
-		return "IMMEDIATELY ADD 2 TO HEALTH";
+		return "REFILL HP";
 	}
 	override public string SvgIcon(){
 		return "HealthUp";
 	}
 	override public bool OnPickup (RLCharacter c, Level level){
+		this.saleValue = 3;
+		return true;
+	}
+	override public bool OnUse(RLCharacter c, Level level){
 		// should destroy self and immediately add 2 to the players health
-		c.healthPoints = Mathf.Max(c.healthPoints+2, 3);
-		return false;
+		c.healthPoints = 3;
+		c.powerups.Remove (this);
+		return true;
 	}
 }
 public class PUScoreUp : PowerUp {
-	public static int scoreValue = 4;
-	override public string DisplayText(){ return "SCORE UP"; }
+	public static int scoreValue = 2;
+	override public string DisplayText(){ return "CREDITS"; }
 	override public string DescriptionText(){
-		return "ADD "+scoreValue+" TO CREDITS";
+		return "SELL FOR "+scoreValue+" CREDITS";
 	}
 	override public string SvgIcon(){
 		return "scoreToken";
 	}
 	override public bool OnPickup (RLCharacter c, Level level){
 		// adds 5 to score
-		level.gameInfo.creditsEarned += scoreValue;
+		return true;
+	}
+	override public bool OnUse(RLCharacter c, Level level){
 		return false;
 	}
 }
 public class PUFastMove : PowerUp {
-	override public string DisplayText(){ return "MOVE FAST"; }
+	int charges = 5;
+	override public string DisplayText(){ return charges+"x FAST"; }
 	override public string DescriptionText(){
 		return "MOVE FAST IN DIRECTION";
 	}
@@ -108,6 +115,7 @@ public class PUFastMove : PowerUp {
 		return "fastMove";
 	}
 	override public bool OnPickup (RLCharacter c, Level level){
+		this.saleValue = 1;
 		return true;
 	}
 	override public bool OnUse (RLCharacter c, Level level){
@@ -115,58 +123,85 @@ public class PUFastMove : PowerUp {
 		// set fast move on the character, and allow them to take another turn
 		c.canUsePowerup = false;
 		c.SetState("fastMove",true);
+		charges--;
+		if (charges <= 0) {
+			c.powerups.Remove (this);
+		}
 		return false;
 	}
 }
 public class PUDelayedHeal : PowerUp {
 	int charges = 3;
-	override public string DisplayText(){ return "HEAL NEIGHBORS ("+charges+")"; }
+	override public string DisplayText(){ return charges+ "x HEAL CREW"; }
 	override public string DescriptionText(){
-		return "HEAL NEIGHBORS";
+		return "HEAL CREW";
 	}
 	override public string SvgIcon(){
 		return "delayedHeal";
 	}
 	override public bool OnPickup (RLCharacter c, Level level){
+		this.saleValue = 1;
 		return true;
 	}
 	override public bool OnUse (RLCharacter c, Level level){
 		base.OnUse (c, level);
-		// check to see if there are any neighbors, and heal them if so
-		level.UpdateMaps ();
-		for (int i = 0; i < 8; i++) {
-			Vector2i nDir = c.position + new Vector2i (RL.Map.nDir [i, 0], RL.Map.nDir [i, 1]);
-			if (level.playerMap [nDir.x, nDir.y] != null) {
-				level.playerMap [nDir.x, nDir.y].healthPoints++;
-				charges--;
-				if (charges <= 0)
-					break;
-			}
+		foreach (RLCharacter p in level.players) {
+			if (p != c)
+				p.healthPoints++;
 		}
+		charges--;
 		if (charges <= 0) {
 			c.powerups.Remove (this);
 		}
+		this.saleValue = Mathf.Max (this.saleValue - 1, 0);
 		return true;
 	}
 }
 public class PUAPRefresh : PowerUp {
 	int charges = 3;
-	override public string DisplayText(){ return "PSV AP+1"; }
+	override public string DisplayText(){ return charges+"x AP+1"; }
 	override public string DescriptionText(){
-		return "AP MAX+1";
+		return "ADD ONE TO AP";
 	}
 
 	override public string SvgIcon(){
 		return "apRefresh";
 	}
 	override public bool OnPickup (RLCharacter c, Level level){
-		c.actionPoints++;
 		this.actionPointModifier = 1;
 		return true;
 	}
 	override public bool OnUse (RLCharacter c, Level level){
 		// should use this anytime they spend the third action point
-		base.OnUse (c, level);
+		if (charges > 0) {
+			base.OnUse (c, level);
+			level.playerActionPoints++;
+			charges--;
+		}
+		return false;
+	}
+}
+
+public class PUAPToCredit : PowerUp {
+	int charges = 5;
+	override public string DisplayText(){ return charges+"x VALUE++"; }
+	override public string DescriptionText(){
+		return "INCREASE SALE VALUE";
+	}
+	override public string SvgIcon(){
+		return "ap_to_credit";
+	}
+	override public bool OnPickup (RLCharacter c, Level level){
+		this.saleValue = 0;
+		return true;
+	}
+	override public bool OnUse (RLCharacter c, Level level){
+		// should use this anytime they spend the third action point
+		if (charges > 0) {
+			charges--;
+			this.saleValue++;
+			return true;
+		}
 		return false;
 	}
 }

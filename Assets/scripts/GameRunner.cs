@@ -12,8 +12,8 @@ public class GameInfo{
 	public string shipName;
 	public GameInfo(){
 		daysRemaining = totalDays = 12; //Random.Range (7, 15);
-		totalCredits = 85; //Random.Range (70, 130);
-		creditsEarned = 5;
+		totalCredits = 90; //Random.Range (70, 130);
+		creditsEarned = 0;
 		shipName = NameGen.GetShipName ();
 	}
 }
@@ -35,9 +35,9 @@ public class GameRunner : MonoBehaviour {
 	ScreenName currentScreen;
 	// Use this for initialization
 	void Awake () {
+		PlayerPrefs.SetFloat ("musicLevel", 1.0f);
+		PlayerPrefs.GetFloat ("sfxLevel", 1.0f);
 		SetupGrid ();
-//		AudioTriggerSystem.instance ().QueueClip ("exc2");
-//		AudioTriggerSystem.instance ().PlayQueue (true);
 	}
 	void Start(){
 		SetupGameInfo ();
@@ -78,6 +78,7 @@ public class GameRunner : MonoBehaviour {
 		// place title at grid position
 		runningGame = false;
 		currentScreen = ScreenName.TITLE;
+		MusicSystem.Title ();
 	}
 	void ClearCurrentPanel(){
 		if (currentPanel != null) {
@@ -101,6 +102,7 @@ public class GameRunner : MonoBehaviour {
 			cp.Init (gameInfo);
 			cp.StartGame = SetupGame;
 			currentScreen = ScreenName.CONTRACT;
+			MusicSystem.Contract ();
 		}
 	}
 	void SetupGame(ContractInfo contract){
@@ -123,6 +125,7 @@ public class GameRunner : MonoBehaviour {
 		gameoverScreen.Init (gameInfo);
 		gameoverScreen.ExitScreen = SetupTitle;
 		currentScreen = ScreenName.GAMEOVER;
+		MusicSystem.GameOver ();
 	}
 	void SetupShop(){
 		ClearCurrentPanel ();
@@ -131,7 +134,9 @@ public class GameRunner : MonoBehaviour {
 		Shop shop = contractPicker.AddComponent<Shop> ();
 		shop.Init (gameInfo);
 		shop.PickContract = SetupContract;
+		shop.EndGame = OnGameOver;
 		currentScreen = ScreenName.SHOP;
+		MusicSystem.Shop ();
 	}
 	void Update(){
 		if (currentScreen == ScreenName.TITLE) {
