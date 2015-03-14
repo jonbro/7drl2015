@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 public static class MusicSystem{
@@ -13,8 +13,8 @@ public static class MusicSystem{
 	}
 	public static void GameNextEnemy(){
 		AudioTriggerSystem.instance ().QueueClip ("bass");
-		if (Random.Range (0, 5) > 0) {
-			switch (Random.Range (0, 5)) {
+		if (Random.Range (0, 4) > 0) {
+			switch (Random.Range (0, 4)) {
 			case 0:
 				AudioTriggerSystem.instance ().QueueClip("drumcutup1-drive_fixed");
 				break;
@@ -24,25 +24,28 @@ public static class MusicSystem{
 			case 2:
 				AudioTriggerSystem.instance ().QueueClip("drumcutup3");
 				break;
-			case 3:
-				AudioTriggerSystem.instance ().QueueClip("drums");
-				break;
 			default:
-				AudioTriggerSystem.instance ().QueueClip("halfdrums");
+				AudioTriggerSystem.instance ().QueueClip("drums");
 				break;
 			}
 		}
-		if (Random.Range (0, 3) == 0) {
+		if (Random.Range (0, 6) >= 2) {
 			AudioTriggerSystem.instance ().QueueClip("jazz");
 		}
 		if (Random.Range (0, 3) == 0) {
 			AudioTriggerSystem.instance ().QueueClip("tapdelay");
 		}
 		if (Random.Range (0, 3) == 0) {
-			AudioTriggerSystem.instance ().QueueClip("lowbass");
+			AudioTriggerSystem.instance ().QueueClip("haunt_partial");
 		}
 		AudioTriggerSystem.instance ().PlayQueue (true, 1);
 	}
+	public static void GameOver(){
+		AudioTriggerSystem.instance ().QueueClip("halfdrums");
+		AudioTriggerSystem.instance ().QueueClip ("halfglitter_good");
+		AudioTriggerSystem.instance ().PlayQueue (true, 1);
+	}
+
 	public static void GameOver(){
 	}
 	public static void Shop(){
@@ -95,7 +98,7 @@ public class AudioTriggerSystem : MonoBehaviour {
 	// Use this for initialization 
 	void Awake(){
 		if (!PlayerPrefs.HasKey ("sfxLevel"))
-			PlayerPrefs.SetFloat ("sfxLevel", 1);
+			PlayerPrefs.SetFloat ("sfxLevel", 0.5);
 		if (!PlayerPrefs.HasKey ("musicLevel"))
 			PlayerPrefs.SetFloat ("musicLevel", 1);
 
