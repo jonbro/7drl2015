@@ -56,7 +56,7 @@ public class GameUI : MonoBehaviour
 			// display the powers the player can use
 			for (int i = 0; i < c.powerups.Count; i++) {
 				Vector3 hoverStart = VectorGui.Pen ().position;
-				VectorGui.Label ((i+1)+":"+c.powerups[i].DisplayText()+"("+c.powerups[i].saleValue+")", 0.1f, color);
+				VectorGui.Label ((i+1)+":"+c.powerups[i].InventoryText(), 0.1f, color);
 				Vector3 hoverEnd = VectorGui.Pen ().position;
 				HoverDescription hover = GetNextHover ();
 				hover.targetRect = new Rect(hoverStart.x, hoverStart.y-0.45f, 8, 0.45f);

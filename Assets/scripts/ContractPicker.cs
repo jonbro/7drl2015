@@ -43,7 +43,7 @@ public class ContractInfo{
 	};
 	public void Init(int maxDays){
 		rooms = Random.Range (3, 6);
-		days = Random.Range (2, Mathf.Min(5, maxDays));
+		days = 3;
 		switch(nameType){
 		case NameType.SHIP:
 			name = NameGen.GetShipName ();

@@ -26,7 +26,7 @@ public class Shop : MonoBehaviour {
 		foreach (RLPlayerCharacterData cd in gameInfo.crew) {
 			int count = 0;
 			foreach (PowerUp p in cd.powerups) {
-				GridSVG powerSvg = GridSVG.CreateFromSvg (-5+playerCount%2*5, 2+count/2, p.SvgIcon());
+				GridSVG powerSvg = GridSVG.CreateFromSvg (-5+playerCount%2*5, 2+count, p.SvgIcon());
 				characterPowers.Add (new CharacterPowerup{character=cd, powerup=p, svg = powerSvg});
 				panel.Add (powerSvg);
 				count++;
@@ -51,7 +51,8 @@ public class Shop : MonoBehaviour {
 				playerCount++;
 				count = 0;
 			}
-			cp.svg.transform.position = Grid.GridToWorld (-5+playerCount%2*8, 2+count/2);
+			Debug.Log (count);
+			cp.svg.transform.position = Grid.GridToWorld (-5+playerCount*6, 2+count);
 			count++;
 		}
 	}
@@ -70,26 +71,33 @@ public class Shop : MonoBehaviour {
 		}
 		Vector2i gp = Grid.WorldToGrid (Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y)));
 		int selectedItem = -1;
-		int itemX = ((gp.x + 5) / 8);
-		int itemY = ((gp.y - 2))*2;
+		int itemX = ((gp.x + 5) / 6);
+		int itemY = ((gp.y - 2));
 		if (itemX >= 0 && itemX < 2) {
 			selectedItem = itemX+itemY;
 		}
 		CharacterPowerup toSell = new CharacterPowerup();
 		bool sold = false;
+		RLPlayerCharacterData c = characterPowers[0].character;
+		int playerCount = 0;	
 		int count = 0;
 		foreach (CharacterPowerup cp in characterPowers) {
-			Color c = Color.white;
-			if (count == selectedItem) {
-				c = GameColors.GetColor ("player");
+			if (c != cp.character) {
+				c = cp.character;
+				playerCount++;
+				count = 0;
+			}
+			Color color = Color.white;
+			if (playerCount == itemX && count == itemY) {
+				color = GameColors.GetColor ("player");
 				if (Input.GetMouseButtonDown (0)) {
 					toSell = cp;
 					sold = true;
 					AudioTriggerSystem.instance ().PlayClipImmediate ("sellitem");
 				}
 			}
-			VectorGui.SetPosition (new Vector2(-4.35f+count%2*8, -1.65f-count/2));
-			VectorGui.Label ("scrap value: "+cp.powerup.saleValue, 0.1f, c);
+			VectorGui.SetPosition (new Vector2(-4.35f+playerCount*6, -1.65f-count));
+			VectorGui.Label (cp.powerup.InventoryText(), 0.1f, color);
 			count++;
 		}
 		if (sold) {

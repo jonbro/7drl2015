@@ -16,6 +16,9 @@ public class PowerUp {
 	virtual public string DisplayText(){
 		return "";
 	}
+	public string InventoryText(){
+		return DisplayText () + "(" + saleValue + ")";
+	}
 	public int saleValue = 4;
 	public int useCount = 0;
 	public int actionPointModifier;

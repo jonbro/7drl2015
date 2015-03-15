@@ -11,7 +11,7 @@ public class GameInfo{
 	public int creditsEarned;
 	public string shipName;
 	public GameInfo(){
-		daysRemaining = totalDays = 12; //Random.Range (7, 15);
+		daysRemaining = totalDays = 3; //Random.Range (7, 15);
 		totalCredits = 90; //Random.Range (70, 130);
 		creditsEarned = 0;
 		shipName = NameGen.GetShipName ();
@@ -41,12 +41,12 @@ public class GameRunner : MonoBehaviour {
 	}
 	void Start(){
 		SetupGameInfo ();
-//		AddRandomScrap ();
-//		SetupShop ();
-		if (jumpToGame)
-			OnGameOver ();
-		else
-			SetupTitle ();
+		AddRandomScrap ();
+		SetupShop ();
+//		if (jumpToGame)
+//			OnGameOver ();
+//		else
+//			SetupTitle ();
 	}
 	void SetupGrid(){
 		int gridX = 20;
