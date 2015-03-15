@@ -136,7 +136,7 @@ public class ContractPicker : MonoBehaviour {
 		// input for selecting contracts
 		Vector2i gp = Grid.WorldToGrid (Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y)));
 		int selectedContract = -1;
-		if (gp.x >= -5&&gp.x<=6
+		if (gp.x >= -5&&gp.x<=10
 			&& gp.y >= 3 && gp.y <= 8
 		) {
 			selectedContract = (gp.y - 3) / 2;

@@ -29,7 +29,7 @@ public class GameOverScreen : MonoBehaviour {
 			} else {
 				// earned the correct number of credits in the alloted time
 				descriptionText = "There was a party on the {0} that night.\n" +
-				"They paid off their bodies and had {1} left over for food.\n";
+				"They paid off their bodies and had {1} credits left over for food.\n";
 				descriptionText = System.String.Format (descriptionText, gameInfo.shipName, gameInfo.creditsEarned - gameInfo.totalCredits);
 				bigText = "SALVAGE SUCCESSFUL";
 			}

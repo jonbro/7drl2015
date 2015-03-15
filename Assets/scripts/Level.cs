@@ -46,12 +46,14 @@ public class Level : MonoBehaviour {
 	public int basePlayerActionPoints = 4;
 	public int spawnTimer = 0;
 	public int apsPerSpawn = 13;
+	public GridSVG spawnDisplay;
 	public void Build(Panel _gamePanel, GameInfo _gameInfo){
 		gameInfo = _gameInfo;
 		gamePanel = _gamePanel;
 		highlightPanel = Panel.Create();
 		ui = ((GameObject)Instantiate((Resources.Load ("UI") as GameObject))).GetComponent<GameUI>();
 		ui.Setup (this);
+
 		fsm = new FsmSystem ();
 		fsm.AddState (new FsmState (FsmStateId.InitialGen)
 			.WithBeforeEnteringAction(InitialGen)
@@ -162,7 +164,8 @@ public class Level : MonoBehaviour {
 		currentPlayer = players[currentPlayerCounter];
 		SelectNextPlayer ();
 		for (int i = 0; i < (currentLevel+1); i++) {
-			AddMonster ();
+			if (!AddMonster ())
+				return false;
 		}
 		// add items to the map
 		for (int i = 0; i < 2; i++) {
@@ -183,11 +186,12 @@ public class Level : MonoBehaviour {
 		MusicSystem.GameNextEnemy ();
 		return true;
 	}
-	void AddMonster(){
+	bool AddMonster(){
 		Vector2i monsterPosition = FindOpenPosition ();
 		// confirm that this position can access the players
 		bool hasPath = false;
-		while (hasPath == false) {	
+		int bailCount = 0;
+		while (hasPath == false && bailCount < 100) {	
 			bool allHavePath = true;
 			foreach (RLCharacter p in players) {
 				List<Vector2i> path = pf.FindPath (p.position, monsterPosition, OneCostFunction, map); 
@@ -200,11 +204,14 @@ public class Level : MonoBehaviour {
 			if(allHavePath)
 				hasPath = true;
 		}
-		RLCharacter monster = RLCharacter.Create (monsterPosition.x, monsterPosition.y, "Enemy", RLCharacterInfo.GetRandomMonster());
+		if (!hasPath)
+			return false;
+		RLCharacter monster = RLCharacter.Create (monsterPosition.x, monsterPosition.y, "Enemy", RLCharacterInfo.GetRandomMonster(this));
 		monster.color = GameColors.GetColor ("enemy");
 		gamePanel.Add (monster);
 		monsters.Add (monster);
 		UpdateMaps ();
+		return true;
 	}
 	void AddItem(PowerUp itemToAdd){
 		Vector2i itemPosition = FindOpenPosition ();
@@ -616,7 +623,7 @@ public class Level : MonoBehaviour {
 			}
 		}
 		foreach (RLCharacter m in monsters) {
-			m.actionPoints = 2;
+			m.actionPoints = m.info.maxActionPoints;
 		}
 		StartCoroutine (WaitAndCall(.55f, () => {
 			if(players.Count == 0)
@@ -685,7 +692,6 @@ public class Level : MonoBehaviour {
 			Destroy (highlightPanel.gameObject);
 	}
 	void Update(){
-		GameObject.Find ("LineRenderManager").GetComponent<LineRenderManager> ().AddCircle (Vector3.zero, 5, Color.white);
 		if(fsm != null)
 			fsm.CurrentState.Update ();
 	}

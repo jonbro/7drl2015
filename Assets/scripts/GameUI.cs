@@ -115,7 +115,21 @@ public class GameUI : MonoBehaviour
 		VectorGui.Label ("ARROW: Move-Atk", 0.1f, Color.white);
 		VectorGui.Label ("TAB: Next Unit", 0.1f, Color.white);
 		VectorGui.Label ("MOUSE: Get Info", 0.1f, Color.white);
-
+		if (PlayerPrefs.GetFloat ("musicLevel") == 1) {
+			VectorGui.Label ("A: Mute Audio", 0.1f, Color.white);
+			if (Input.GetKeyDown (KeyCode.A)) {
+				PlayerPrefs.SetFloat ("musicLevel", 0);
+				PlayerPrefs.SetFloat ("sfxLevel", 0);
+				AudioTriggerSystem.instance ().MuteAudio ();
+			}
+		} else {
+			VectorGui.Label ("A: Unmute Audio", 0.1f, Color.white);
+			if (Input.GetKeyDown (KeyCode.A)) {
+				PlayerPrefs.SetFloat ("musicLevel", 1);
+				PlayerPrefs.SetFloat ("sfxLevel", 1);
+				AudioTriggerSystem.instance ().UnmuteAudio ();
+			}
+		}
 		VectorGui.SetPosition (new Vector2(-.35f, -7.65f));
 		VectorGui.Label (System.String.Format("Credits: {0} (of {1}) Level: {2} / {3}", level.gameInfo.creditsEarned, level.gameInfo.totalCredits, level.currentLevel, level.contract.rooms), 0.1f, Color.white);
 		foreach (String description in itemDescription) {

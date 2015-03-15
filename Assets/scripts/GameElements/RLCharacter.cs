@@ -15,19 +15,32 @@ public class RLCharacterInfo {
 		coreColor = GameColors.GetColor ("player");
 	}
 	public static RLCharacterInfo baseMonster = new RLCharacterInfo {
-		description = "SMPL: RANGE 3 : END ON ATK",
+		description = "RANGE 3 2AP",
 		svgName = "enemy",
 		coreColor = GameColors.GetColor("enemy")
 	};
 	public static RLCharacterInfo monsterMultifire = new RLCharacterInfo {
-		description = "ASLT: RANGE 2 : MULTIFIRE",
+		description = "RANGE 2 2AP",
 		svgName = "enemy_range2",
 		fireRadius = 2,
 		coreColor = GameColors.GetColor("enemy")
 	};
-	public static RLCharacterInfo GetRandomMonster(){
-		switch (UnityEngine.Random.Range (0, 2)) {
+	public static RLCharacterInfo monsterMaxRange = new RLCharacterInfo {
+		description = "RANGE MAX 1AP",
+		svgName = "enemy_range8",
+		fireRadius = 8,
+		maxActionPoints = 1,
+		maxHealth = 4,
+		coreColor = GameColors.GetColor("enemy")
+	};
+	public static RLCharacterInfo GetRandomMonster(Level level){
+//		if(level.gameInfo.daysRemaining == 0)
+		switch (UnityEngine.Random.Range (0, 6)) {
 		case 0:
+			return monsterMaxRange;
+		case 1:
+			return baseMonster;
+		case 2:
 			return baseMonster;
 		default:
 			return monsterMultifire;
@@ -159,7 +172,7 @@ public class RLCharacter : DisplayElement
 			if (value < _healthPoints) {
 				Compression.PopBlur (transform, 0.9f, 1.25f, .8f);
 			}
-			_healthPoints = Mathf.Min(3, value);
+			_healthPoints = Mathf.Min(info.maxHealth, value);
 			if (healthPointDisplay == null) {
 				healthPointDisplay = GridSVG.CreateFromSvg (x, y, "HP_3").GetComponent<SvgRenderer>();
 				GameObject healthPointDisplayGO = healthPointDisplay.gameObject;

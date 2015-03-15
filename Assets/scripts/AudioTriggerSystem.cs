@@ -96,7 +96,7 @@ public class AudioTriggerSystem : MonoBehaviour {
 	// Use this for initialization 
 	void Awake(){
 		if (!PlayerPrefs.HasKey ("sfxLevel"))
-			PlayerPrefs.SetFloat ("sfxLevel", 0.5f);
+			PlayerPrefs.SetFloat ("sfxLevel", 1f);
 		if (!PlayerPrefs.HasKey ("musicLevel"))
 			PlayerPrefs.SetFloat ("musicLevel", 1);
 
@@ -164,6 +164,16 @@ public class AudioTriggerSystem : MonoBehaviour {
 		if (clips.ContainsKey (s)) {
 			transform.position = Camera.main.transform.position;
 			audio.PlayOneShot (clips [s].GetRandom(), PlayerPrefs.GetFloat ("sfxLevel")*0.6f);
+		}
+	}
+	public void MuteAudio(){
+		foreach (string k in playingLoops.Keys) {
+			playingLoops [k].volume = 0;
+		}
+	}
+	public void UnmuteAudio(){
+		foreach (string k in playingLoops.Keys) {
+			playingLoops [k].volume = 1;
 		}
 	}
 	public void PlayQueue(bool fadeLoops = false, float fadeSpeed = 1.0f){
