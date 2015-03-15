@@ -21,7 +21,7 @@ public class Compression : ImageEffectBase {
 		instance = this;
 	}
 	public static void PopBlur(Transform target, float amount, float time, float minTarget = 0.5f){
-		instance.center.transform.localPosition = Vector3.zero;
+		//instance.center.transform.localPosition = Vector3.zero;
 		instance.StartCoroutine(instance.PopBlurCoro(amount, time, minTarget, target));
 	}
 	IEnumerator PopBlurCoro(float amount, float time, float minTarget, Transform targetCenter){
