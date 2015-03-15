@@ -13,6 +13,8 @@ public static class MusicSystem{
 	}
 	public static void GameNextEnemy(){
 		AudioTriggerSystem.instance ().QueueClip ("bass");
+		AudioTriggerSystem.instance ().QueueClip("jazz");
+
 		if (Random.Range (0, 4) > 0) {
 			switch (Random.Range (0, 4)) {
 			case 0:
@@ -29,9 +31,8 @@ public static class MusicSystem{
 				break;
 			}
 		}
-		if (Random.Range (0, 6) >= 2) {
-			AudioTriggerSystem.instance ().QueueClip("jazz");
-		}
+
+		
 		if (Random.Range (0, 3) == 0) {
 			AudioTriggerSystem.instance ().QueueClip("tapdelay");
 		}
