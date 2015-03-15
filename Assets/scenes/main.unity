@@ -73,7 +73,6 @@ NavMeshSettings:
     minRegionArea: 2
     widthInaccuracy: 16.666666
     heightInaccuracy: 10
-    tileSizeHint: 0
   m_NavMesh: {fileID: 0}
 --- !u!1 &390254106
 GameObject:
@@ -233,13 +232,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shader: {fileID: 4800000, guid: c9556cbfdacdef5469f49615b5ae2658, type: 3}
-  flow: {fileID: 2800000, guid: d05ee18d14dd34f4f9083fdc838cd8a5, type: 3}
+  flow: {fileID: 2800000, guid: e80c3c84ea861404d8a427db8b7abf04, type: 3}
   stop: {fileID: 0}
-  offset: {x: .00100000005, y: .00100000005}
-  fade: .280000001
-  phase: 380.262238
+  offset: {x: .00300000003, y: .00300000003}
+  fade: .699999988
+  phase: 415.655365
   phasePerSecond: .930000007
-  scrollPerSecond: {x: .0700000003, y: .0900000036}
+  scrollPerSecond: {x: .0199999996, y: .0299999993}
   center: {fileID: 2114070967}
 --- !u!114 &390254114
 MonoBehaviour:
@@ -247,13 +246,13 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 390254106}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 990247e7a0aeff9478694380a85d6db9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shader: {fileID: 0}
-  textureRamp: {fileID: 0}
+  shader: {fileID: 4800000, guid: d9fa1e818284136489c1d3d220be36ef, type: 3}
+  textureRamp: {fileID: 2800000, guid: bda2b79ba57dd9c45978515df3e8a928, type: 3}
   offset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &578558958
 GameObject:
@@ -377,6 +376,10 @@ Prefab:
     - target: {fileID: 460022, guid: a78ace0696c2a544797835f92e60b504, type: 2}
       propertyPath: m_RootOrder
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 160022, guid: a78ace0696c2a544797835f92e60b504, type: 2}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: a78ace0696c2a544797835f92e60b504, type: 2}
@@ -509,6 +512,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c17ff6a63a4364a2d91b6fb3bccb1e88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  blurTarget: {fileID: 2114070967}
   jumpToGame: 0
   grid: {fileID: 880538683}
 --- !u!1 &2114070966

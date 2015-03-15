@@ -19,6 +19,8 @@ public class GameInfo{
 }
 
 public class GameRunner : MonoBehaviour {
+	Camera cam;
+	public Transform blurTarget;
 	Panel currentPanel;
 	public bool jumpToGame = true;
 	public GameObject grid;
@@ -37,6 +39,7 @@ public class GameRunner : MonoBehaviour {
 	void Awake () {
 		PlayerPrefs.SetFloat ("musicLevel", 1.0f);
 		PlayerPrefs.GetFloat ("sfxLevel", 1.0f);
+		cam = FindObjectOfType<Camera>();
 		SetupGrid ();
 	}
 	void Start(){
@@ -156,6 +159,9 @@ public class GameRunner : MonoBehaviour {
 			VectorGui.Label ("Jonathan Brodsky (at:jonbro)", 0.1f, Color.white);
 			VectorGui.Label ("Additional Graphics: Cale Bradbury (at:netgrind)", 0.1f, Color.white);
 			VectorGui.Label ("Music by: Sal Farina & Austin Redwood", 0.1f, Color.white);
+		}
+		if(currentScreen!=ScreenName.GAME){
+			blurTarget.transform.position = Vector3.Lerp(cam.ScreenToWorldPoint(Input.mousePosition),blurTarget.transform.position,.5f);
 		}
 	}
 }
