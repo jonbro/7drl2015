@@ -92,15 +92,16 @@ public class PUHealthUp : PowerUp {
 	}
 }
 public class PUScoreUp : PowerUp {
-	public static int scoreValue = 2;
+	public int saleValue = 2;
 	override public string DisplayText(){ return "CREDITS"; }
 	override public string DescriptionText(){
-		return "SELL FOR "+scoreValue+" CREDITS";
+		return "SELL FOR "+saleValue+" CREDITS";
 	}
 	override public string SvgIcon(){
 		return "scoreToken";
 	}
 	override public bool OnPickup (RLCharacter c, Level level){
+		this.saleValue = 2;
 		// adds 5 to score
 		return true;
 	}

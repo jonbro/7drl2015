@@ -43,7 +43,7 @@ public class ContractInfo{
 	};
 	public void Init(int maxDays){
 		rooms = Random.Range (3, 6);
-		days = 3;
+		days = 1;
 		switch(nameType){
 		case NameType.SHIP:
 			name = NameGen.GetShipName ();
@@ -163,7 +163,7 @@ public class ContractPicker : MonoBehaviour {
 			VectorGui.SetPosition (new Vector2(-2.35f, -2*i-3.65f));
 			VectorGui.Label ("Days: "+contracts[i].days, 0.1f, c);
 			VectorGui.SetPosition (new Vector2(1.65f, -2*i-3.65f));
-			VectorGui.Label ("Min Credits: "+contracts[i].rooms*PUScoreUp.scoreValue, 0.1f, c);
+			VectorGui.Label ("Min Credits: "+contracts[i].rooms*new PUScoreUp().saleValue, 0.1f, c);
 		}
 		VectorGui.SetPosition (new Vector2(-2.35f, -8.65f));
 		VectorGui.Label ("Click To Select Contract", 0.1f, Color.white);

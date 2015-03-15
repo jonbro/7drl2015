@@ -116,6 +116,7 @@ public class AudioTriggerSystem : MonoBehaviour {
 		LoadLoop("drumcutup3", 0.5f);
 		LoadLoop("drums", 0.5f);
 		LoadLoop("halfdrums", 0.5f);
+		LoadLoop("jazz", 0.5f);
 	
 		LoadClip("1moveleft");
 		LoadClip("2moveleft");
@@ -125,6 +126,7 @@ public class AudioTriggerSystem : MonoBehaviour {
 		LoadClip("enemymove");
 		LoadClip("getitem");
 		LoadClip("sellitem");
+		LoadClip("playerdied");
 		LoadClip("use_powerup");
 
 		LoadClip("all_clear");

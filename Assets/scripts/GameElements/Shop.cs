@@ -44,16 +44,18 @@ public class Shop : MonoBehaviour {
 	void FixPowerPositions(){
 		int count = 0;
 		int playerCount = 0;
-		RLPlayerCharacterData c = characterPowers[0].character;
-		foreach (CharacterPowerup cp in characterPowers) {
-			if (c != cp.character) {
-				c = cp.character;
-				playerCount++;
-				count = 0;
+		if (characterPowers.Count > 0) {
+			RLPlayerCharacterData c = characterPowers [0].character;
+			foreach (CharacterPowerup cp in characterPowers) {
+				if (c != cp.character) {
+					c = cp.character;
+					playerCount++;
+					count = 0;
+				}
+				Debug.Log (count);
+				cp.svg.transform.position = Grid.GridToWorld (-5 + playerCount * 6, 2 + count);
+				count++;
 			}
-			Debug.Log (count);
-			cp.svg.transform.position = Grid.GridToWorld (-5+playerCount*6, 2+count);
-			count++;
 		}
 	}
 	// Update is called once per frame
@@ -78,35 +80,37 @@ public class Shop : MonoBehaviour {
 		}
 		CharacterPowerup toSell = new CharacterPowerup();
 		bool sold = false;
-		RLPlayerCharacterData c = characterPowers[0].character;
-		int playerCount = 0;	
-		int count = 0;
-		foreach (CharacterPowerup cp in characterPowers) {
-			if (c != cp.character) {
-				c = cp.character;
-				playerCount++;
-				count = 0;
-			}
-			Color color = Color.white;
-			if (playerCount == itemX && count == itemY) {
-				color = GameColors.GetColor ("player");
-				if (Input.GetMouseButtonDown (0)) {
-					toSell = cp;
-					sold = true;
-					AudioTriggerSystem.instance ().PlayClipImmediate ("sellitem");
+		if (characterPowers.Count > 0) {
+			RLPlayerCharacterData c = characterPowers [0].character;
+			int playerCount = 0;	
+			int count = 0;
+			foreach (CharacterPowerup cp in characterPowers) {
+				if (c != cp.character) {
+					c = cp.character;
+					playerCount++;
+					count = 0;
 				}
+				Color color = Color.white;
+				if (playerCount == itemX && count == itemY) {
+					color = GameColors.GetColor ("player");
+					if (Input.GetMouseButtonDown (0)) {
+						toSell = cp;
+						sold = true;
+						AudioTriggerSystem.instance ().PlayClipImmediate ("sellitem");
+					}
+				}
+				VectorGui.SetPosition (new Vector2 (-4.35f + playerCount * 6, -1.65f - count));
+				VectorGui.Label (cp.powerup.InventoryText (), 0.1f, color);
+				count++;
 			}
-			VectorGui.SetPosition (new Vector2(-4.35f+playerCount*6, -1.65f-count));
-			VectorGui.Label (cp.powerup.InventoryText(), 0.1f, color);
-			count++;
-		}
-		if (sold) {
-			gameInfo.creditsEarned += toSell.powerup.saleValue;
-			RebuildInfoStrings ();
-			toSell.svg.Destroy ();
-			toSell.character.powerups.Remove (toSell.powerup);
-			characterPowers.Remove (toSell);
-			FixPowerPositions ();
+			if (sold) {
+				gameInfo.creditsEarned += toSell.powerup.saleValue;
+				RebuildInfoStrings ();
+				toSell.svg.Destroy ();
+				toSell.character.powerups.Remove (toSell.powerup);
+				characterPowers.Remove (toSell);
+				FixPowerPositions ();
+			}
 		}
 		VectorGui.SetPosition (new Vector2(-5.35f, -7.65f));
 		VectorGui.Label ("Click to sell items, unsold items 2x value", 0.1f, Color.white);

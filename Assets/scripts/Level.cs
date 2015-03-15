@@ -421,11 +421,6 @@ public class Level : MonoBehaviour {
 		AudioTriggerSystem.instance ().PlayClipImmediate (playerActionPoints+"moveleft");
 		playerActionPoints--;
 		spawnTimer++;
-		if (spawnTimer - apsPerSpawn >= 0) {
-			spawnTimer = 0;
-			MusicSystem.GameNextEnemy ();
-			AddMonster ();
-		}
 		int nonGhostCount = 0;
 		foreach (RLCharacter m in monsters) {
 			if (!m.ghost && !m.stun)
@@ -434,6 +429,10 @@ public class Level : MonoBehaviour {
 		if (nonGhostCount == 0) {
 			MoveToNextLevel ();
 		} else {
+			if (spawnTimer - apsPerSpawn >= 0) {
+				spawnTimer = 0;
+				AddMonster ();
+			}
 			if (playerActionPoints <= 0) {
 				if (monsters.Count <= 0) {
 					gameInfo.creditsEarned--;
@@ -500,6 +499,7 @@ public class Level : MonoBehaviour {
 						gameInfo.crew.Remove (enemy.characterData);
 						players.Remove (enemy);
 						gamePanel.elements.Remove (enemy);
+						AudioTriggerSystem.instance ().PlayClipImmediate ("playerdied");
 						enemy.Destroy ();
 					}
 				}
@@ -632,6 +632,7 @@ public class Level : MonoBehaviour {
 		if (OnGameOver != null) {
 			OnGameOver ();
 		}
+		Destroy (gameObject);
 	}
 	public IEnumerator WaitAndCall(float time, System.Action toCall){
 		yield return new WaitForSeconds (time);

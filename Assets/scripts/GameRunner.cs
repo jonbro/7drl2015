@@ -41,12 +41,12 @@ public class GameRunner : MonoBehaviour {
 	}
 	void Start(){
 		SetupGameInfo ();
-		AddRandomScrap ();
-		SetupShop ();
-//		if (jumpToGame)
-//			OnGameOver ();
-//		else
-//			SetupTitle ();
+//		AddRandomScrap ();
+//		SetupShop ();
+		if (jumpToGame)
+			OnGameOver ();
+		else
+			SetupTitle ();
 	}
 	void SetupGrid(){
 		int gridX = 20;
@@ -151,6 +151,11 @@ public class GameRunner : MonoBehaviour {
 			if (Input.GetKeyDown (KeyCode.Space)) {
 				SetupContract ();
 			}
+			VectorGui.Label ("", 0.4f, Color.white);
+			VectorGui.Label ("BY: ", 0.1f, Color.white);
+			VectorGui.Label ("Jonathan Brodsky (at:jonbro)", 0.1f, Color.white);
+			VectorGui.Label ("Additional Graphics: Cale Bradbury (at:netgrind)", 0.1f, Color.white);
+			VectorGui.Label ("Music by: Sal Farina & Austin Redwood", 0.1f, Color.white);
 		}
 	}
 }
