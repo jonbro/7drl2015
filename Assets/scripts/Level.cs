@@ -431,6 +431,7 @@ public class Level : MonoBehaviour {
 		} else {
 			if (spawnTimer - apsPerSpawn >= 0) {
 				spawnTimer = 0;
+				AudioTriggerSystem.instance ().PlayClipImmediate ("enemyspawn");
 				AddMonster ();
 			}
 			if (playerActionPoints <= 0) {
@@ -684,6 +685,7 @@ public class Level : MonoBehaviour {
 			Destroy (highlightPanel.gameObject);
 	}
 	void Update(){
+		GameObject.Find ("LineRenderManager").GetComponent<LineRenderManager> ().AddCircle (Vector3.zero, 5, Color.white);
 		if(fsm != null)
 			fsm.CurrentState.Update ();
 	}

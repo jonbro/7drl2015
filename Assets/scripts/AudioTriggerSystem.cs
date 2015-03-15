@@ -127,6 +127,7 @@ public class AudioTriggerSystem : MonoBehaviour {
 		LoadClip("getitem");
 		LoadClip("sellitem");
 		LoadClip("playerdied");
+		LoadClip("enemyspawn");
 		LoadClip("use_powerup");
 
 		LoadClip("all_clear");
