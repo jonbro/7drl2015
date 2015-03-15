@@ -22,15 +22,18 @@ public class Shop : MonoBehaviour {
 		setup = true;
 		RebuildInfoStrings ();
 		// for each of the powerups that was being carried by the crew, add a display
-		int count = 0;
+		int playerCount = 0;
 		foreach (RLPlayerCharacterData cd in gameInfo.crew) {
+			int count = 0;
 			foreach (PowerUp p in cd.powerups) {
-				GridSVG powerSvg = GridSVG.CreateFromSvg (-5+count%2*8, 2+count/2, p.SvgIcon());
+				GridSVG powerSvg = GridSVG.CreateFromSvg (-5+playerCount%2*5, 2+count/2, p.SvgIcon());
 				characterPowers.Add (new CharacterPowerup{character=cd, powerup=p, svg = powerSvg});
 				panel.Add (powerSvg);
 				count++;
 			}
+			playerCount++;
 		}
+		FixPowerPositions ();
 	}
 	void RebuildInfoStrings(){
 		string introductionText = "A successful misson. But was it enough?\n" +
@@ -40,8 +43,15 @@ public class Shop : MonoBehaviour {
 	}
 	void FixPowerPositions(){
 		int count = 0;
+		int playerCount = 0;
+		RLPlayerCharacterData c = characterPowers[0].character;
 		foreach (CharacterPowerup cp in characterPowers) {
-			cp.svg.transform.position = Grid.GridToWorld (-5+count%2*8, 2+count/2);
+			if (c != cp.character) {
+				c = cp.character;
+				playerCount++;
+				count = 0;
+			}
+			cp.svg.transform.position = Grid.GridToWorld (-5+playerCount%2*8, 2+count/2);
 			count++;
 		}
 	}

@@ -46,8 +46,6 @@ public static class MusicSystem{
 		AudioTriggerSystem.instance ().PlayQueue (true, 1);
 	}
 
-	public static void GameOver(){
-	}
 	public static void Shop(){
 		AudioTriggerSystem.instance ().QueueClip ("bass");
 		AudioTriggerSystem.instance ().QueueClip ("tapdelay");
@@ -98,7 +96,7 @@ public class AudioTriggerSystem : MonoBehaviour {
 	// Use this for initialization 
 	void Awake(){
 		if (!PlayerPrefs.HasKey ("sfxLevel"))
-			PlayerPrefs.SetFloat ("sfxLevel", 0.5);
+			PlayerPrefs.SetFloat ("sfxLevel", 0.5f);
 		if (!PlayerPrefs.HasKey ("musicLevel"))
 			PlayerPrefs.SetFloat ("musicLevel", 1);
 
